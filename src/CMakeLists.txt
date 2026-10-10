@@ -1,6 +1,4 @@
 
-enable_language(C)
-
 add_definitions(-DSDL_MAIN_HANDLED)
 
 include(FetchContent)
@@ -14,7 +12,6 @@ FetchContent_Declare(
 add_executable(
 	Nillium
 	"main.cpp"
-	"main.h"
 )
 
  target_include_directories(Nillium PRIVATE 
