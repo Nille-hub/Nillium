@@ -1,4 +1,3 @@
-
 # SDL.h renames main() to SDL_main() unless SDL_MAIN_HANDLED is defined.
 # Without it, linking fails with an unresolved main/SDL_main.
 # With it, call SDL_SetMainReady() before SDL_Init().
