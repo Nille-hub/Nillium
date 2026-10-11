@@ -1,5 +1,8 @@
 
-add_definitions(-DSDL_MAIN_HANDLED) # Needed later for SDL.h to rename main to SDL_main
+# SDL.h renames main() to SDL_main() unless SDL_MAIN_HANDLED is defined.
+# Without it, linking fails with an unresolved main/SDL_main.
+# With it, call SDL_SetMainReady() before SDL_Init().
+add_definitions(-DSDL_MAIN_HANDLED)
 
 add_executable(
 	Nillium
