@@ -1,5 +1,5 @@
 
-add_definitions(-DSDL_MAIN_HANDLED)
+add_definitions(-DSDL_MAIN_HANDLED) # Needed later for SDL.h to rename main to SDL_main
 
 add_executable(
 	Nillium
@@ -7,7 +7,7 @@ add_executable(
 )
 
  target_include_directories(Nillium PRIVATE 
-	${CMAKE_CURRENT_BINARY_DIR} # Would be relevant for headers generated with configure_file
+	${CMAKE_CURRENT_BINARY_DIR} # Needed later for headers generated with configure_file
 	${CMAKE_CURRENT_SOURCE_DIR} # Relevant for including from src as root when having subfolders in src
  )
 
