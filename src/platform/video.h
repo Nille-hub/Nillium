@@ -21,5 +21,5 @@ public:
   FramebufferSize framebufferSize() const;
 
 private:
-  GLFWwindow *m_window = nullptr;
+  GLFWwindow* m_window = nullptr;
 };

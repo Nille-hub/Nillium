@@ -21,8 +21,8 @@ Video::Video() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  m_window = glfwCreateWindow(mode->width / 2, mode->height / 2, 
-             "Nillium", nullptr, nullptr);
+  m_window = glfwCreateWindow(mode->width / 2, mode->height / 2,
+                              "Nillium", nullptr, nullptr);
 
   if (!m_window) {
     glfwTerminate();

@@ -8,7 +8,7 @@ int main() {
   try {
     App app;
     app.run();
-  } catch (const std::exception &e) {
+  } catch (const std::exception& e) {
     std::println(stderr, "Nillium: {}", e.what());
     return 1;
   }

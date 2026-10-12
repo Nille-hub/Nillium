@@ -64,6 +64,7 @@ Every event added here states that justification.
 - Files are named by concern, not by hardware category.
 - Types in `PascalCase`, functions and variables in `camelCase`,
   data members with an `m_` prefix.
+- `*` and `&` bind to the type: `GLFWwindow* window`, `const Video& video`.
 
 ### Includes
 - Project headers are included with the layer path and quotes:
