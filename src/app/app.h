@@ -1,5 +1,4 @@
 #pragma once
-
 #include "platform/video.h"
 
 class App {
