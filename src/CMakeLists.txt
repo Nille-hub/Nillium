@@ -6,9 +6,9 @@ add_definitions(-DSDL_MAIN_HANDLED)
 add_executable(
 	Nillium
 	"main.cpp"
-	"app/app.h" 
+	"app/app.h"
 	"app/app.cpp"
-	"platform/video.h" 
+	"platform/video.h"
 	"platform/video.cpp"
 )
 
