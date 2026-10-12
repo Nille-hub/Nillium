@@ -9,4 +9,5 @@ project(Nillium LANGUAGES C CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+add_subdirectory("external/glad")
 add_subdirectory("src")

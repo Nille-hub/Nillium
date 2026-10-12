@@ -14,3 +14,5 @@ target_include_directories(Nillium PRIVATE
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+target_link_libraries(Nillium PRIVATE glad)
