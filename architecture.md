@@ -51,8 +51,9 @@ Every event added here states that justification.
 | GLFW    | 3.4              | FetchContent, pinned commit             | Platform only                |
 | glad    | 0.1.36, GL 4.6 core | Generated, vendored in `external/glad/` | Platform, Presentation, App |
 
-- GLFW headers are included only in `platform/`. No GLFW type appears in a
-  Platform public header.
+- GLFW headers are included only in `platform/` source files. No public member
+  function of a Platform class takes or returns a GLFW type; a forward
+  declaration for a private member is allowed.
 
 ## Conventions
 
