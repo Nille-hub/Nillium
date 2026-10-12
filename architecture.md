@@ -44,6 +44,16 @@ None.
 Rule: an event is legitimate only if nothing breaks when nobody listens.
 Every event added here states that justification.
 
+## Third-party dependencies
+
+| Library | Version          | Source                                  | Used by                      |
+|---------|------------------|-----------------------------------------|------------------------------|
+| GLFW    | 3.4              | FetchContent, pinned commit             | Platform only                |
+| glad    | 0.1.36, GL 4.6 core | Generated, vendored in `external/glad/` | Platform, Presentation, App |
+
+- GLFW headers are included only in `platform/`. No GLFW type appears in a
+  Platform public header.
+
 ## Conventions
 
 ### Naming
