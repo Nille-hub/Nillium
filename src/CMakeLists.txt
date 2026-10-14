@@ -10,6 +10,8 @@ add_executable(
 	"app/app.cpp"
 	"assets/graphic.h"
 	"assets/graphic.cpp"
+	"assets/palette.h"
+	"assets/palette.cpp"
 	"assets/wad.h"
 	"assets/wad.cpp"
 	"platform/video.h"
