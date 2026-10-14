@@ -1,56 +1,59 @@
 #include "assets/wad.h"
 
+#include <algorithm>
+#include <cctype>
+#include <cstdint>
 #include <fstream>
 #include <stdexcept>
 
 namespace {
-  constexpr std::size_t headerSize = 12;
-  constexpr std::size_t entrySize = 16;
-  constexpr std::size_t nameSize = 8;
+constexpr std::size_t headerSize = 12;
+constexpr std::size_t entrySize = 16;
+constexpr std::size_t nameSize = 8;
 
-  std::vector<std::byte> readFile(const std::filesystem::path& path) {
-    std::ifstream file(path, std::ios::binary);
+std::vector<std::byte> readFile(const std::filesystem::path& path) {
+  std::ifstream file(path, std::ios::binary);
 
-    if (!file) {
-      throw std::runtime_error("cannot open " + path.string());
-    }
-
-    std::vector<std::byte> data(std::filesystem::file_size(path));
-    file.read(reinterpret_cast<char*>(data.data()), static_cast<std::streamsize>(data.size()));
-
-    if (!file) {
-      throw std::runtime_error("cannot read " + path.string());
-    }
-
-    return data;
+  if (!file) {
+    throw std::runtime_error("cannot open " + path.string());
   }
 
-  std::int32_t readInt32(std::span<const std::byte> bytes, std::size_t offset) {
-    std::uint32_t value = 0;
+  std::vector<std::byte> data(std::filesystem::file_size(path));
+  file.read(reinterpret_cast<char*>(data.data()), static_cast<std::streamsize>(data.size()));
 
-    for (std::size_t i = 0; i < 4; ++i) {
-      value |= std::to_integer<std::uint32_t>(bytes[offset + i]) << (8 * i);
-    }
-
-    return static_cast<std::int32_t>(value);
+  if (!file) {
+    throw std::runtime_error("cannot read " + path.string());
   }
 
-  std::string toUpper(std::string_view text) {
-    std::string result(text);
+  return data;
+}
 
-    for (char& c : result) {
-      c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
-    }
+std::int32_t readInt32(std::span<const std::byte> bytes, std::size_t offset) {
+  std::uint32_t value = 0;
 
-    return result;
+  for (std::size_t i = 0; i < 4; ++i) {
+    value |= std::to_integer<std::uint32_t>(bytes[offset + i]) << (8 * i);
   }
 
-  std::string readName(std::span<const std::byte> bytes, std::size_t offset) {
-    const auto* first = reinterpret_cast<const char*>(bytes.data() + offset);
-    const std::string_view raw(first, nameSize);
+  return static_cast<std::int32_t>(value);
+}
 
-    return toUpper(raw.substr(0, raw.find('\0')));
+std::string toUpper(std::string_view text) {
+  std::string result(text);
+
+  for (char& c : result) {
+    c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
   }
+
+  return result;
+}
+
+std::string readName(std::span<const std::byte> bytes, std::size_t offset) {
+  const auto* first = reinterpret_cast<const char*>(bytes.data() + offset);
+  const std::string_view raw(first, nameSize);
+
+  return toUpper(raw.substr(0, raw.find('\0')));
+}
 } // namespace
 
 Wad::Wad(const std::filesystem::path& path) : m_data(readFile(path)) {

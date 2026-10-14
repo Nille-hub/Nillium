@@ -14,7 +14,7 @@ public:
   Wad(const Wad&) = delete;
   Wad& operator=(const Wad&) = delete;
 
-  std::span<const std::byte> lump(std::string_view) const;
+  std::span<const std::byte> lump(std::string_view name) const;
 
 private:
   struct Entry {
