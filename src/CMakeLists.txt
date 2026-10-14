@@ -14,6 +14,8 @@ add_executable(
 	"assets/wad.cpp"
 	"platform/video.h"
 	"platform/video.cpp"
+	"presentation/page.h"
+	"presentation/page.cpp"
 	"presentation/shaderprogram.h"
 	"presentation/shaderprogram.cpp"
 	"presentation/texture.h"

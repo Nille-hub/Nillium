@@ -2,6 +2,7 @@
 
 #include "assets/wad.h"
 #include "platform/video.h"
+#include "presentation/page.h"
 
 #include <filesystem>
 
@@ -14,4 +15,5 @@ public:
 private:
   Wad m_wad;
   Video m_video;
+  Page m_page;
 };
