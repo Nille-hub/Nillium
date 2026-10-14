@@ -55,6 +55,13 @@ GLFW is fetched automatically; glad is included.
 
 Or open the folder in Visual Studio and pick the `x64-debug` preset.
 
+## License
+
+Copyright (C) 2026 Nille
+
+Nillium is free software under the GNU General Public License v3.0 or later.
+See [LICENSE](LICENSE).
+
 ## Disclaimer
 
 DOOM is a registered trademark of id Software LLC, a ZeniMax Media company.
