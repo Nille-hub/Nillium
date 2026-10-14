@@ -1,5 +1,7 @@
 #include "presentation/page.h"
 
+#include <glad/glad.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
