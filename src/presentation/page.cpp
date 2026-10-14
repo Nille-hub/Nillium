@@ -7,6 +7,10 @@
 
 namespace {
 
+// Doom's pixels are 1.2 times taller than wide: 320x200 pages show as 4:3,
+// the 426x200 widescreen pages as 16:9.
+constexpr float pixelAspect = 1.2f;
+
 constexpr std::string_view vertexSource = R"glsl(
 #version 460 core
 
@@ -70,20 +74,23 @@ std::vector<std::uint8_t> paletteTexels(const std::array<Palette, paletteCount>&
 Page::Page(const WadGraphic& graphic, const std::array<Palette, paletteCount>& palettes)
     : m_program(vertexSource, fragmentSource),
       m_graphic(graphic.width, graphic.height, TextureFormat::Rg8, indexOpaqueTexels(graphic)),
-      m_palettes(256, static_cast<int>(paletteCount), TextureFormat::Rgb8, paletteTexels(palettes)) {}
+      m_palettes(256, static_cast<int>(paletteCount), TextureFormat::Rgb8, paletteTexels(palettes)),
+      m_aspect(static_cast<float>(graphic.width) / (static_cast<float>(graphic.height) * pixelAspect)) {}
 
 void Page::draw(FramebufferSize size) const {
   glViewport(0, 0, size.width, size.height);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // Doom draws its 320x200 pages at a 4:3 aspect ratio; centre that area.
+  // Keep the page's aspect ratio and centre it in the window.
+  const auto width = static_cast<float>(size.width);
+  const auto height = static_cast<float>(size.height);
   int pageWidth = size.width;
   int pageHeight = size.height;
-  if (size.width * 3 > size.height * 4) {
-    pageWidth = size.height * 4 / 3;
+  if (width > height * m_aspect) {
+    pageWidth = static_cast<int>(height * m_aspect);
   } else {
-    pageHeight = size.width * 3 / 4;
+    pageHeight = static_cast<int>(width / m_aspect);
   }
   glViewport((size.width - pageWidth) / 2, (size.height - pageHeight) / 2, pageWidth, pageHeight);
 

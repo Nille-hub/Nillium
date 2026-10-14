@@ -20,4 +20,5 @@ private:
   VertexArray m_vertexArray;
   Texture m_graphic;
   Texture m_palettes;
+  float m_aspect = 0.0f;
 };

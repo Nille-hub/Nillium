@@ -25,7 +25,7 @@ Folders are created when the first module of that layer is added.
 |--------------|-------------------------------|----------------|
 | App          | `main.cpp`                    | Entry point. Parses `-iwad`, creates `App` and runs it. |
 | App          | `app/app.*`                   | Owns the top-level objects (`Video`, `Wad`, renderers). Runs the main loop: poll, tics, render. |
-| Presentation | `presentation/page.*`         | Draws a full-screen 320x200 graphic centred at 4:3. Applies the palette in its shader. |
+| Presentation | `presentation/page.*`         | Draws a full-screen graphic centred at its own aspect ratio (Doom pixels are 1.2 times taller than wide). Applies the palette in its shader. |
 | Presentation | `presentation/texture.*`      | RAII owner of one GL texture. |
 | Presentation | `presentation/shaderprogram.*` | RAII owner of one GL shader program. |
 | Presentation | `presentation/vertexarray.*`  | RAII owner of one GL vertex array object. |
