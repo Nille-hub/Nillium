@@ -8,6 +8,8 @@ add_executable(
 	"main.cpp"
 	"app/app.h"
 	"app/app.cpp"
+	"assets/wad.h"
+	"assets/wad.cpp"
 	"platform/video.h"
 	"platform/video.cpp"
 )
