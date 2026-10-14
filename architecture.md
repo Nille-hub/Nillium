@@ -21,11 +21,18 @@ Folders are created when the first module of that layer is added.
 
 ## Modules
 
-| Layer    | Module           | Responsibility                                                      |
-|----------|------------------|---------------------------------------------------------------------|
-| App      | `main.cpp`       | Entry point. Creates `App` and runs it.                             |
-| App      | `app/app.*`      | Owns the platform objects. Runs the main loop: poll, tics, render.  |
-| Platform | `platform/video.*` | Initialises and terminates GLFW. Owns the window and GL context.  |
+| Layer        | Module                        | Responsibility |
+|--------------|-------------------------------|----------------|
+| App          | `main.cpp`                    | Entry point. Parses `-iwad`, creates `App` and runs it. |
+| App          | `app/app.*`                   | Owns the top-level objects (`Video`, `Wad`, renderers). Runs the main loop: poll, tics, render. |
+| Presentation | `presentation/page.*`         | Draws a full-screen 320x200 graphic centred at 4:3. Applies the palette in its shader. |
+| Presentation | `presentation/texture.*`      | RAII owner of one GL texture. |
+| Presentation | `presentation/shaderprogram.*` | RAII owner of one GL shader program. |
+| Presentation | `presentation/vertexarray.*`  | RAII owner of one GL vertex array object. |
+| Assets       | `assets/wad.*`                | Reads a WAD file once. Owns its bytes and directory. Lump lookup by name, last match wins. |
+| Assets       | `assets/graphic.*`            | Decodes a patch lump into a `WadGraphic`: palette indices and opaque flags, row-major. |
+| Assets       | `assets/palette.*`            | Decodes the 14 palettes from `PLAYPAL`. |
+| Platform     | `platform/video.*`            | Initialises and terminates GLFW. Owns the window and GL context. |
 
 ## State ownership
 
@@ -34,8 +41,14 @@ Folders are created when the first module of that layer is added.
 | Window + GL context | `Video`                 | App     | Platform | App calls `video.swapBuffers()` and `video.pollEvents()`. |
 | Close requested   | GLFW (OS close button), behind `Video` | App | Platform | App queries `video.closeRequested()`. |
 | Quit decision     | App, local to the main loop | none  | App      | Combines all quit requests and ends the loop. |
-| Framebuffer size  | GLFW, behind `Video`      | App     | Platform | App queries `video.framebufferSize()` and gets a value. |
+| Framebuffer size  | GLFW, behind `Video`      | App     | Platform | App queries `video.framebufferSize()` and passes the value to renderers. |
 | Last tic run      | App, local to the main loop | none  | App      | Computed from absolute elapsed time via `std::chrono::steady_clock`. |
+| WAD path          | `main`, parsed once from `-iwad` | App | App   | Passed to App's constructor as a value. Missing argument: usage, exit code 1. |
+| WAD data (bytes + directory) | `Wad`, written once in its constructor | Assets functions, via `const Wad&` | Assets | App constructs `Wad` from the path. |
+| Palettes (14, from `PLAYPAL`) | Written once by `readPalettes` | `Page` constructor | Assets | Returned as a value; uploaded once as the palette texture. |
+| `WadGraphic`      | Written once by `readGraphic` | `Page` constructor | Assets | Returned as a value; uploaded once as the graphic texture. |
+| `Page` GL resources (graphic texture, palette texture, shader program, vertex array) | RAII owners inside `Page`, immutable after construction | `Page`, when drawing | Presentation | The shader looks up each pixel's colour in palette row 0. |
+| `Page`            | App member, declared after `Video` | App | Presentation | App calls `page.draw(framebufferSize)` each frame. |
 
 ## Events
 
@@ -49,7 +62,7 @@ Every event added here states that justification.
 | Library | Version          | Source                                  | Used by                      |
 |---------|------------------|-----------------------------------------|------------------------------|
 | GLFW    | 3.4              | FetchContent, pinned commit             | Platform only                |
-| glad    | 0.1.36, GL 4.6 core | Generated, vendored in `external/glad/` | Platform, Presentation, App |
+| glad    | 0.1.36, GL 4.6 core | Generated, vendored in `external/glad/` | Platform, Presentation |
 
 - GLFW headers are included only in `platform/` source files. No public member
   function of a Platform class takes or returns a GLFW type; a forward
@@ -71,7 +84,13 @@ Every event added here states that justification.
   `#include "platform/video.h"`.
 - A header from a higher layer in an include list is an architecture violation.
 
+### Assets
+- Decoders are free functions `readX(const Wad&, ...)` that return plain structs.
+- Decoded assets are immutable after loading. They hold palette indices,
+  never colours; the palette is applied when drawing.
+
 ### GPU resources
 - Every GL handle is created and deleted by exactly one move-only owner.
 - GL resource owners are declared after `Video` in `App`, so they are destroyed
   before the GL context.
+- Shader sources are embedded in the `.cpp` of the module that uses them.
