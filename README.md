@@ -37,7 +37,7 @@ updated together with the code it describes.
 ## Status
 
 - [x] Slice 1: window, GL context, fixed 35 Hz tic loop, clean shutdown
-- [ ] Slice 2: WAD access, palettes, first graphic on screen
+- [x] Slice 2: WAD access, palettes, first graphic on screen
 - [ ] Slice 3: title screen, menu and game mode
 - [ ] Slice 4: map loading
 - [ ] Slice 5: world rendering
@@ -54,6 +54,13 @@ GLFW is fetched automatically; glad is included.
     cmake --build out/build/x64-debug
 
 Or open the folder in Visual Studio and pick the `x64-debug` preset.
+
+## Running
+
+No game data is included. You need an IWAD from a copy of DOOM or DOOM II you
+own, for example `DOOM.WAD` or `DOOM2.WAD`.
+
+    out/build/x64-debug/bin/Nillium.exe -iwad path/to/DOOM2.WAD
 
 ## License
 
