@@ -1,5 +1,6 @@
 #include "app/app.h"
 #include "assets/graphic.h"
+#include "assets/palette.h"
 
 #include <chrono>
 
@@ -15,7 +16,8 @@ int ticsSince(Clock::time_point start) {
 }
 } // namespace
 
-App::App(const std::filesystem::path& iwad) : m_wad(iwad), m_page(readGraphic(m_wad, "TITLEPIC")) {}
+App::App(const std::filesystem::path& iwad)
+    : m_wad(iwad), m_page(readGraphic(m_wad, "TITLEPIC"), readPalettes(m_wad)) {}
 
 void App::run() {
   const Clock::time_point start = Clock::now();

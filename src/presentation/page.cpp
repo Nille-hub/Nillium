@@ -28,13 +28,15 @@ in vec2 uv;
 out vec4 color;
 
 layout(binding = 0) uniform sampler2D graphic;
+layout(binding = 1) uniform sampler2D palettes;
 
 void main() {
   vec2 texel = texture(graphic, uv).rg;
   if (texel.g < 0.5) {
     discard;
   }
-  color = vec4(vec3(texel.r), 1.0);
+  int index = int(texel.r * 255.0 + 0.5);
+  color = vec4(texelFetch(palettes, ivec2(index, 0), 0).rgb, 1.0);
 }
 )glsl";
 
@@ -49,11 +51,26 @@ std::vector<std::uint8_t> indexOpaqueTexels(const WadGraphic& graphic) {
   return texels;
 }
 
+// One row per palette, 256 RGB texels per row.
+std::vector<std::uint8_t> paletteTexels(const std::array<Palette, paletteCount>& palettes) {
+  std::vector<std::uint8_t> texels;
+  texels.reserve(paletteCount * 256 * 3);
+  for (const Palette& palette : palettes) {
+    for (const Rgb& color : palette.colors) {
+      texels.push_back(color.r);
+      texels.push_back(color.g);
+      texels.push_back(color.b);
+    }
+  }
+  return texels;
+}
+
 } // namespace
 
-Page::Page(const WadGraphic& graphic)
+Page::Page(const WadGraphic& graphic, const std::array<Palette, paletteCount>& palettes)
     : m_program(vertexSource, fragmentSource),
-      m_graphic(graphic.width, graphic.height, TextureFormat::Rg8, indexOpaqueTexels(graphic)) {}
+      m_graphic(graphic.width, graphic.height, TextureFormat::Rg8, indexOpaqueTexels(graphic)),
+      m_palettes(256, static_cast<int>(paletteCount), TextureFormat::Rgb8, paletteTexels(palettes)) {}
 
 void Page::draw(FramebufferSize size) const {
   glViewport(0, 0, size.width, size.height);
@@ -72,6 +89,7 @@ void Page::draw(FramebufferSize size) const {
 
   glUseProgram(m_program.id());
   glBindTextureUnit(0, m_graphic.id());
+  glBindTextureUnit(1, m_palettes.id());
   glBindVertexArray(m_vertexArray.id());
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
