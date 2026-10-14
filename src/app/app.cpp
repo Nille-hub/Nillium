@@ -17,6 +17,8 @@ int ticsSince(Clock::time_point start) {
 
 } // namespace
 
+App::App(const std::filesystem::path& iwad) : m_wad(iwad) {}
+
 void App::run() {
   const Clock::time_point start = Clock::now();
   int lastTic = 0;
