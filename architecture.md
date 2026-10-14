@@ -34,6 +34,62 @@ Folders are created when the first module of that layer is added.
 | Assets       | `assets/palette.*`            | Decodes the 14 palettes from `PLAYPAL`. |
 | Platform     | `platform/video.*`            | Initialises and terminates GLFW. Owns the window and GL context. |
 
+## Dependency graph
+
+An arrow means "includes or depends on". Every arrow points to the same layer
+or a lower one; an arrow pointing upward is an architecture violation.
+
+```mermaid
+graph TB
+  subgraph AppLayer["App"]
+    main["main.cpp"]
+    app["app/app"]
+  end
+
+  subgraph PresentationLayer["Presentation"]
+    page["presentation/page"]
+    texture["presentation/texture"]
+    shaderprogram["presentation/shaderprogram"]
+    vertexarray["presentation/vertexarray"]
+  end
+
+  subgraph AssetsLayer["Assets"]
+    graphic["assets/graphic"]
+    palette["assets/palette"]
+    wad["assets/wad"]
+  end
+
+  subgraph PlatformLayer["Platform"]
+    video["platform/video"]
+  end
+
+  subgraph External["Third-party"]
+    glfw["GLFW"]
+    glad["glad"]
+  end
+
+  main --> app
+  app --> video
+  app --> wad
+  app --> graphic
+  app --> palette
+  app --> page
+  page --> texture
+  page --> shaderprogram
+  page --> vertexarray
+  page --> graphic
+  page --> palette
+  page --> video
+  page --> glad
+  graphic --> wad
+  palette --> wad
+  texture --> glad
+  shaderprogram --> glad
+  vertexarray --> glad
+  video --> glfw
+  video --> glad
+```
+
 ## State ownership
 
 | State             | Owner (writer)            | Readers | Layer    | Flow |
