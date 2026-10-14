@@ -14,7 +14,6 @@ int ticsSince(Clock::time_point start) {
   const auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - start);
   return static_cast<int>(elapsed.count() * ticsPerSecond / 1'000'000);
 }
-
 } // namespace
 
 App::App(const std::filesystem::path& iwad) : m_wad(iwad) {}
