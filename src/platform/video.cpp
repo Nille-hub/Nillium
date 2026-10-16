@@ -36,7 +36,7 @@ Video::Video() {
     throw std::runtime_error("gladLoadGLLoader failed");
   }
 
-  glfwSwapInterval(1);
+  glfwSwapInterval(1); // vsync
 }
 
 Video::~Video() {
