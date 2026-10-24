@@ -19,6 +19,7 @@ enum class ItemAction {
   NewGame,
   ChooseEpisode,
   ChooseSkill,
+  Quit,
 };
 
 struct MenuItem {

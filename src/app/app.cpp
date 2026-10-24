@@ -63,12 +63,20 @@ App::App(const std::filesystem::path& iwad)
 void App::run() {
   const Clock::time_point start = Clock::now();
   int lastTic = 0;
+  bool quitChosen = false;
 
-  while (!m_video.closeRequested()) {
+  while (!m_video.closeRequested() && !quitChosen) {
     for (const KeyEvent& event : m_video.pollEvents()) {
       const MenuAction action = m_menu.respond(toMenuInput(event.key), m_game.mode());
-      if (action.kind == MenuAction::Kind::NewGame) {
+      switch (action.kind) {
+      case MenuAction::Kind::None:
+        break;
+      case MenuAction::Kind::NewGame:
         m_game.newGame(action.episode, action.skill);
+        break;
+      case MenuAction::Kind::Quit:
+        quitChosen = true;
+        break;
       }
     }
 

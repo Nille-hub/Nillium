@@ -89,6 +89,8 @@ MenuAction Menu::select() {
   case ItemAction::ChooseSkill:
     m_open = false;
     return MenuAction{MenuAction::Kind::NewGame, m_chosenEpisode, static_cast<Skill>(position)};
+  case ItemAction::Quit:
+    return MenuAction{MenuAction::Kind::Quit};
   }
   return MenuAction{};
 }

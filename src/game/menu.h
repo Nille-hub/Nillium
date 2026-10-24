@@ -20,6 +20,7 @@ struct MenuAction {
   enum class Kind {
     None,
     NewGame,
+    Quit,
   };
 
   Kind kind = Kind::None;

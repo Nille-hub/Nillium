@@ -12,7 +12,7 @@ constexpr std::array<MenuItem, 6> doomMainItems{{
     {"M_LOADG"},
     {"M_SAVEG"},
     {"M_RDTHIS"},
-    {"M_QUITG"},
+    {"M_QUITG", ItemAction::Quit},
 }};
 
 // Doom II has no "Read This!" item, and its main menu sits 8 units lower.
@@ -21,7 +21,7 @@ constexpr std::array<MenuItem, 5> doom2MainItems{{
     {"M_OPTION"},
     {"M_LOADG"},
     {"M_SAVEG"},
-    {"M_QUITG"},
+    {"M_QUITG", ItemAction::Quit},
 }};
 
 constexpr std::array<MenuGraphic, 1> episodeDecorations{{{"M_EPISOD", 54, 38}}};
