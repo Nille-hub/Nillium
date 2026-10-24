@@ -23,7 +23,7 @@ Key translate(int glfwKey) {
 
 void Video::onKey(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/) {
   if (action == GLFW_RELEASE) {
-      return;
+    return;
   }
 
   auto* video = static_cast<Video*>(glfwGetWindowUserPointer(window));
