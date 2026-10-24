@@ -21,11 +21,13 @@ add_executable(
 	"presentation/graphicstore.cpp"
 	"presentation/page.h"
 	"presentation/page.cpp"
+	"presentation/patchdrawer.h"
+	"presentation/patchdrawer.cpp"
 	"presentation/shaderprogram.h"
 	"presentation/shaderprogram.cpp"
 	"presentation/texture.h"
 	"presentation/texture.cpp"
-	"presentation/vertexarray.h"
+	"presentation/patchdrawer.h"
 	"presentation/vertexarray.cpp"
 )
 
