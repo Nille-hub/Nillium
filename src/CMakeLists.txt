@@ -26,6 +26,8 @@ add_executable(
 	"presentation/drawframe.cpp"
 	"presentation/graphicstore.h"
 	"presentation/graphicstore.cpp"
+	"presentation/menuview.h"
+	"presentation/menuview.cpp"
 	"presentation/patchdrawer.h"
 	"presentation/patchdrawer.cpp"
 	"presentation/shaderprogram.h"
