@@ -26,7 +26,6 @@ struct MenuItem {
   ItemAction action = ItemAction::None;
 };
 
-
 // A graphic drawn at a fixed position whenever its menu is shown, e.g. a title.
 struct MenuGraphic {
   std::string_view name;
