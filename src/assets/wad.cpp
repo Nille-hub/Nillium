@@ -92,6 +92,12 @@ Wad::Wad(const std::filesystem::path& path) : m_data(readFile(path)) {
   }
 }
 
+bool Wad::contains(std::string_view name) const {
+  const std::string wanted = toUpper(name);
+  return std::any_of(m_directory.begin(), m_directory.end(),
+                    [&](const Entry& entry){ return entry.name == wanted; });
+}
+
 std::span<const std::byte> Wad::lump(std::string_view name) const {
   const std::string wanted = toUpper(name);
   const auto found = std::find_if(m_directory.rbegin(), m_directory.rend(),

@@ -7,6 +7,7 @@
 #include <vector>
 
 namespace {
+
 // One texel per pixel: red = palette index, green = 255 if opaque, 0 if transparent.
 std::vector<std::uint8_t> indexOpaqueTexels(const WadGraphic& graphic) {
   std::vector<std::uint8_t> texels;
