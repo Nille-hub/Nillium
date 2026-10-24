@@ -20,7 +20,7 @@ Key translate(int glfwKey) {
 
 } // namespace
 
-void Video::onKey(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void Video::onKey(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/) {
   if (action == GLFW_RELEASE) {
       return;
   }
