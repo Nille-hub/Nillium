@@ -38,7 +38,7 @@ updated together with the code it describes.
 
 - [x] Slice 1: window, GL context, fixed 35 Hz tic loop, clean shutdown
 - [x] Slice 2: WAD access, palettes, first graphic on screen
-- [ ] Slice 3: title screen, menu and game mode
+- [x] Slice 3: title screen, menu and game mode
 - [ ] Slice 4: map loading
 - [ ] Slice 5: world rendering
 - [ ] Slice 6: thinkers, player, movement and collision

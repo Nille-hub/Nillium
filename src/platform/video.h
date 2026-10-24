@@ -1,5 +1,9 @@
 #pragma once
 
+#include "platform/keys.h"
+
+#include <vector>
+
 struct GLFWwindow;
 
 struct FramebufferSize {
@@ -16,10 +20,13 @@ public:
   Video& operator=(const Video&) = delete;
 
   bool closeRequested() const;
-  void pollEvents();
+  std::vector<KeyEvent> pollEvents();
   void swapBuffers();
   FramebufferSize framebufferSize() const;
 
 private:
+  static void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
+
   GLFWwindow* m_window = nullptr;
+  std::vector<KeyEvent> m_keys;
 };

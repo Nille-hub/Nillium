@@ -1,8 +1,11 @@
 #pragma once
 
 #include "assets/wad.h"
+#include "game/game.h"
+#include "game/menu.h"
 #include "platform/video.h"
-#include "presentation/page.h"
+#include "presentation/graphicstore.h"
+#include "presentation/patchdrawer.h"
 
 #include <filesystem>
 
@@ -14,6 +17,9 @@ public:
 
 private:
   Wad m_wad;
+  Game m_game;
+  Menu m_menu;
   Video m_video;
-  Page m_page;
+  GraphicStore m_graphics;
+  PatchDrawer m_drawer;
 };

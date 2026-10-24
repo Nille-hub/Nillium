@@ -4,6 +4,32 @@
 #include <GLFW/glfw3.h>
 
 #include <stdexcept>
+#include <utility>
+
+namespace {
+
+Key translate(int glfwKey) {
+  switch (glfwKey) {
+  case GLFW_KEY_UP:         return Key::Up;
+  case GLFW_KEY_DOWN:       return Key::Down;
+  case GLFW_KEY_ENTER:
+  case GLFW_KEY_KP_ENTER:   return Key::Enter;
+  case GLFW_KEY_ESCAPE:     return Key::Escape;
+  case GLFW_KEY_BACKSPACE:  return Key::Backspace;
+  default:                  return Key::Other;
+  }
+}
+
+} // namespace
+
+void Video::onKey(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/) {
+  if (action == GLFW_RELEASE) {
+    return;
+  }
+
+  auto* video = static_cast<Video*>(glfwGetWindowUserPointer(window));
+  video->m_keys.push_back(KeyEvent{translate(key)});
+}
 
 Video::Video() {
   if (!glfwInit()) {
@@ -29,6 +55,9 @@ Video::Video() {
     throw std::runtime_error("glfwCreateWindow failed");
   }
 
+  glfwSetWindowUserPointer(m_window, this);
+  glfwSetKeyCallback(m_window, onKey);
+
   glfwMakeContextCurrent(m_window);
   if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
     glfwDestroyWindow(m_window);
@@ -48,8 +77,9 @@ bool Video::closeRequested() const {
   return glfwWindowShouldClose(m_window) == GLFW_TRUE;
 }
 
-void Video::pollEvents() {
+std::vector<KeyEvent> Video::pollEvents() {
   glfwPollEvents();
+  return std::exchange(m_keys, {});
 }
 
 void Video::swapBuffers() {

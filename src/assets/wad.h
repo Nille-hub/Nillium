@@ -14,6 +14,7 @@ public:
   Wad(const Wad&) = delete;
   Wad& operator=(const Wad&) = delete;
 
+  bool contains(std::string_view name) const;
   std::span<const std::byte> lump(std::string_view name) const;
 
 private:

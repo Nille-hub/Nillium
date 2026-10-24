@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <fstream>
 #include <stdexcept>
+#include <utility>
 
 namespace {
 constexpr std::size_t headerSize = 12;
@@ -90,6 +91,12 @@ Wad::Wad(const std::filesystem::path& path) : m_data(readFile(path)) {
 
     m_directory.push_back({std::move(name), static_cast<std::size_t>(offset), static_cast<std::size_t>(size)});
   }
+}
+
+bool Wad::contains(std::string_view name) const {
+  const std::string wanted = toUpper(name);
+  return std::any_of(m_directory.begin(), m_directory.end(),
+                    [&](const Entry& entry){ return entry.name == wanted; });
 }
 
 std::span<const std::byte> Wad::lump(std::string_view name) const {
