@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <fstream>
 #include <stdexcept>
+#include <utility>
 
 namespace {
 constexpr std::size_t headerSize = 12;
