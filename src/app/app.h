@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assets/wad.h"
+#include "game/game.h"
 #include "game/menu.h"
 #include "platform/video.h"
 #include "presentation/graphicstore.h"
@@ -16,6 +17,7 @@ public:
 
 private:
   Wad m_wad;
+  Game m_game;
   Menu m_menu;
   Video m_video;
   GraphicStore m_graphics;

@@ -6,6 +6,7 @@
 #include "presentation/drawframe.h"
 
 #include <chrono>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -25,18 +26,29 @@ GameVariant variantOf(const Wad& wad) {
   return wad.contains("MAP01") ? GameVariant::Doom2 : GameVariant::Doom;
 }
 
-std::vector<std::string_view> graphicNames(GameVariant variant) {
-  std::vector<std::string_view> names = menuGraphicNames(variant);
+// Shareware has episode 1, registered 1 to 3, Ultimate Doom 1 to 4. Doom II has none.
+int episodesIn(const Wad& wad) {
+  int episodes = 0;
+  while (episodes < 4 && wad.contains("E" + std::to_string(episodes + 1) + "M1")) {
+    ++episodes;
+  }
+  return episodes;
+}
+
+std::vector<std::string_view> graphicNames(const Wad& wad) {
+  std::vector<std::string_view> names = menuGraphicNames(variantOf(wad), episodesIn(wad));
   names.push_back(titlePageName);
   return names;
 }
 
 MenuInput toMenuInput(Key key) {
   switch (key) {
-  case Key::Up:     return MenuInput::Up;
-  case Key::Down:   return MenuInput::Down;
-  case Key::Escape: return MenuInput::Close;
-  default:          return MenuInput::Other;
+  case Key::Up:        return MenuInput::Up;
+  case Key::Down:      return MenuInput::Down;
+  case Key::Enter:     return MenuInput::Select;
+  case Key::Backspace: return MenuInput::Back;
+  case Key::Escape:    return MenuInput::Toggle;
+  default:             return MenuInput::Other;
   }
 }
 
@@ -44,8 +56,8 @@ MenuInput toMenuInput(Key key) {
 
 App::App(const std::filesystem::path& iwad)
     : m_wad(iwad),
-      m_menu(variantOf(m_wad)),
-      m_graphics(m_wad, graphicNames(variantOf(m_wad))),
+      m_menu(variantOf(m_wad), episodesIn(m_wad)),
+      m_graphics(m_wad, graphicNames(m_wad)),
       m_drawer(readPalettes(m_wad)) {}
 
 void App::run() {
@@ -54,7 +66,10 @@ void App::run() {
 
   while (!m_video.closeRequested()) {
     for (const KeyEvent& event : m_video.pollEvents()) {
-      m_menu.respond(toMenuInput(event.key));
+      const MenuAction action = m_menu.respond(toMenuInput(event.key), m_game.mode());
+      if (action.kind == MenuAction::Kind::NewGame) {
+        m_game.newGame(action.episode, action.skill);
+      }
     }
 
     const int nowTic = ticsSince(start);
@@ -62,7 +77,7 @@ void App::run() {
       m_menu.tic();
     }
 
-    drawFrame(m_video.framebufferSize(), m_drawer, m_graphics, m_menu);
+    drawFrame(m_video.framebufferSize(), m_drawer, m_graphics, m_game, m_menu);
 
     m_video.swapBuffers();
   }
