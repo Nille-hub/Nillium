@@ -17,6 +17,8 @@ add_executable(
 	"platform/keys.h"
 	"platform/video.h"
 	"platform/video.cpp"
+	"presentation/graphicstore.h"
+	"presentation/graphicstore.cpp"
 	"presentation/page.h"
 	"presentation/page.cpp"
 	"presentation/shaderprogram.h"
