@@ -1,8 +1,10 @@
 #include "app/app.h"
-#include "assets/graphic.h"
 #include "assets/palette.h"
+#include "presentation/drawframe.h"
 
+#include <array>
 #include <chrono>
+#include <string_view>
 
 namespace {
 
@@ -17,7 +19,9 @@ int ticsSince(Clock::time_point start) {
 } // namespace
 
 App::App(const std::filesystem::path& iwad)
-    : m_wad(iwad), m_page(readGraphic(m_wad, "TITLEPIC"), readPalettes(m_wad)) {}
+    : m_wad(iwad),
+      m_graphics(m_wad, std::array<std::string_view, 1>{titlePageName}),
+      m_drawer(readPalettes(m_wad)) {}
 
 void App::run() {
   const Clock::time_point start = Clock::now();
@@ -31,7 +35,7 @@ void App::run() {
       // Simulation step; empty until the game layer exists.
     }
 
-    m_page.draw(m_video.framebufferSize());
+    drawFrame(m_video.framebufferSize(), m_drawer, m_graphics);
 
     m_video.swapBuffers();
   }
