@@ -27,7 +27,7 @@ add_executable(
 	"presentation/shaderprogram.cpp"
 	"presentation/texture.h"
 	"presentation/texture.cpp"
-	"presentation/patchdrawer.h"
+	"presentation/vertexarray.h"
 	"presentation/vertexarray.cpp"
 )
 
