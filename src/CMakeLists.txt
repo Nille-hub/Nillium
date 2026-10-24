@@ -14,6 +14,7 @@ add_executable(
 	"assets/palette.cpp"
 	"assets/wad.h"
 	"assets/wad.cpp"
+	"platform/keys.h"
 	"platform/video.h"
 	"platform/video.cpp"
 	"presentation/page.h"
