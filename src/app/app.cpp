@@ -5,9 +5,9 @@
 #include "platform/keys.h"
 #include "presentation/drawframe.h"
 
-#include <array>
 #include <chrono>
 #include <string_view>
+#include <vector>
 
 namespace {
 
