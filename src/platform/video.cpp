@@ -48,13 +48,13 @@ Video::Video() {
   m_window = glfwCreateWindow(mode->width / 2, mode->height / 2,
                               "Nillium", nullptr, nullptr);
 
-  glfwSetWindowUserPointer(m_window, this);
-  glfwSetKeyCallback(m_window, onKey);
-
   if (!m_window) {
     glfwTerminate();
     throw std::runtime_error("glfwCreateWindow failed");
   }
+
+  glfwSetWindowUserPointer(m_window, this);
+  glfwSetKeyCallback(m_window, onKey);
 
   glfwMakeContextCurrent(m_window);
   if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
