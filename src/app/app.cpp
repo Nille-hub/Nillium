@@ -1,5 +1,7 @@
 #include "app/app.h"
+#include "assets/map.h"
 #include "assets/palette.h"
+#include "game/game.h"
 #include "game/menudefs.h"
 #include "game/variant.h"
 #include "platform/keys.h"
@@ -8,6 +10,7 @@
 #include <chrono>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -71,9 +74,11 @@ void App::run() {
       switch (action.kind) {
       case MenuAction::Kind::None:
         break;
-      case MenuAction::Kind::NewGame:
-        m_game.newGame(action.episode, action.skill, readMap(m_wad, firstMapName(variantOf(m_wad), action.episode)));
+      case MenuAction::Kind::NewGame: {
+        MapData map = readMap(m_wad, firstMapName(variantOf(m_wad), action.episode));
+        m_game.newGame(action.episode, action.skill, std::move(map));
         break;
+      }
       case MenuAction::Kind::Quit:
         quitChosen = true;
         break;
