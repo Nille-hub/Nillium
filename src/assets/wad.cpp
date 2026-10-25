@@ -91,11 +91,25 @@ bool Wad::contains(std::string_view name) const {
 }
 
 std::span<const std::byte> Wad::lump(std::string_view name) const {
+  return lumpAt(index(name));
+}
+
+std::size_t Wad::index(std::string_view name) const {
   const std::string wanted = toUpper(name);
   const auto found = std::find_if(m_directory.rbegin(), m_directory.rend(),
                                   [&](const Entry& entry) { return entry.name == wanted; });
   if (found == m_directory.rend()) {
     throw std::runtime_error("lump " + wanted + " not found");
   }
-  return std::span<const std::byte>(m_data).subspan(found->offset, found->size);
+
+  return static_cast<std::size_t>(std::distance(found, m_directory.rend())) - 1;
+}
+
+std::string_view Wad::nameAt(std::size_t position) const {
+  return m_directory.at(position).name;
+}
+
+std::span<const std::byte> Wad::lumpAt(std::size_t position) const {
+  const Entry& entry = m_directory.at(position);
+  return std::span<const std::byte>(m_data).subspan(entry.offset, entry.size);
 }
