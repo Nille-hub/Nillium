@@ -1,4 +1,5 @@
 #include "assets/wad.h"
+#include "assets/bytes.h"
 
 #include <algorithm>
 #include <cctype>
@@ -27,16 +28,6 @@ std::vector<std::byte> readFile(const std::filesystem::path& path) {
   }
 
   return data;
-}
-
-std::int32_t readInt32(std::span<const std::byte> bytes, std::size_t offset) {
-  std::uint32_t value = 0;
-
-  for (std::size_t i = 0; i < 4; ++i) {
-    value |= std::to_integer<std::uint32_t>(bytes[offset + i]) << (8 * i);
-  }
-
-  return static_cast<std::int32_t>(value);
 }
 
 std::string toUpper(std::string_view text) {

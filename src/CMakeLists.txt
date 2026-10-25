@@ -8,6 +8,8 @@ add_executable(
 	"main.cpp"
 	"app/app.h"
 	"app/app.cpp"
+	"assets/bytes.h"
+	"assets/bytes.cpp"
 	"assets/graphic.h"
 	"assets/graphic.cpp"
 	"assets/palette.h"
