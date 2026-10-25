@@ -21,7 +21,7 @@ void Game::newGame(int episode, Skill skill, MapData map) {
 
 std::string firstMapName(GameVariant variant, int episode) {
   if (variant == GameVariant::Doom2) {
-      return "MAP01";
+    return "MAP01";
   }
 
   return std::format("E{}M1", episode);
