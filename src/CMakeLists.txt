@@ -12,6 +12,8 @@ add_executable(
 	"assets/bytes.cpp"
 	"assets/graphic.h"
 	"assets/graphic.cpp"
+	"assets/map.h"
+	"assets/map.cpp"
 	"assets/palette.h"
 	"assets/palette.cpp"
 	"assets/wad.h"
