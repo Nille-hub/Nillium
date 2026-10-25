@@ -72,7 +72,7 @@ void App::run() {
       case MenuAction::Kind::None:
         break;
       case MenuAction::Kind::NewGame:
-        m_game.newGame(action.episode, action.skill);
+        m_game.newGame(action.episode, action.skill, readMap(m_wad, firstMapName(variantOf(m_wad), action.episode)));
         break;
       case MenuAction::Kind::Quit:
         quitChosen = true;
