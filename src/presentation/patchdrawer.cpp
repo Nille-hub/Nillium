@@ -2,9 +2,7 @@
 
 #include <glad/glad.h>
 
-#include <cstdint>
 #include <string_view>
-#include <vector>
 
 namespace {
 
@@ -43,31 +41,12 @@ void main() {
   color = vec4(texelFetch(palettes, ivec2(index, 0), 0).rgb, 1.0);
 }
 )glsl";
-
-// One row per palette, 256 RGB texels per row.
-std::vector<std::uint8_t> paletteTexels(const std::array<Palette, paletteCount>& palettes) {
-  std::vector<std::uint8_t> texels;
-  texels.reserve(paletteCount * 256 * 3);
-  for (const Palette& palette : palettes) {
-    for (const Rgb& color : palette.colors) {
-      texels.push_back(color.r);
-      texels.push_back(color.g);
-      texels.push_back(color.b);
-    }
-  }
-  return texels;
-}
-
-Texture makePaletteTexture(const std::array<Palette, paletteCount>& palettes) {
-  return Texture(256, static_cast<int>(paletteCount), TextureFormat::Rgb8, paletteTexels(palettes));
-}
-
 } // namespace
 
-PatchDrawer::PatchDrawer(const std::array<Palette, paletteCount>& palettes)
-    : m_program(vertexSource, fragmentSource), m_palettes(makePaletteTexture(palettes)) {}
+PatchDrawer::PatchDrawer() : m_program(vertexSource, fragmentSource) {}
 
-void PatchDrawer::draw(FramebufferSize window, const GraphicEntry& graphic, int x, int y) const {
+void PatchDrawer::draw(FramebufferSize window, const Texture& palettes,
+                       const GraphicEntry& graphic, int x, int y) const {
   const auto windowWidth = static_cast<float>(window.width);
   const auto windowHeight = static_cast<float>(window.height);
   if (windowWidth <= 0.0f || windowHeight <= 0.0f) {
@@ -101,7 +80,7 @@ void PatchDrawer::draw(FramebufferSize window, const GraphicEntry& graphic, int 
   glProgramUniform4f(m_program.id(), 0, toNdcX(left), toNdcY(top), toNdcX(right), toNdcY(bottom));
   glUseProgram(m_program.id());
   glBindTextureUnit(0, graphic.texture.id());
-  glBindTextureUnit(1, m_palettes.id());
+  glBindTextureUnit(1, palettes.id());
   glBindVertexArray(m_vertexArray.id());
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

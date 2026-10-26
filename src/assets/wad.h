@@ -17,6 +17,14 @@ public:
   bool contains(std::string_view name) const;
   std::span<const std::byte> lump(std::string_view name) const;
 
+  // Directory position of the last lump with this name. Throws if there is none.
+  std::size_t index(std::string_view name) const;
+  // Name and contents of the lump at a directory position. Throw if out of range.
+  std::string_view nameAt(std::size_t position) const;
+  // Not an overload of lump(): lump(0) would be ambiguous, because 0 is also a
+  // null pointer and std::string_view can be constructed from const char*.
+  std::span<const std::byte> lumpAt(std::size_t position) const;
+
 private:
   struct Entry {
     std::string name;
