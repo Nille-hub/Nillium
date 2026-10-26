@@ -3,7 +3,7 @@
 
 #include <glad/glad.h>
 
-void drawFrame(FramebufferSize window, const PatchDrawer& drawer, const GraphicStore& graphics,
+void drawFrame(FramebufferSize window, const PatchDrawer& drawer, const Texture& palettes, const GraphicStore& graphics,
                const Game& game, const Menu& menu) {
   glViewport(0, 0, window.width, window.height);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -13,10 +13,10 @@ void drawFrame(FramebufferSize window, const PatchDrawer& drawer, const GraphicS
   if (game.mode() == GameMode::Title) {
     // Pages wider than 320 (widescreen title pictures) extend equally to both sides.
     const GraphicEntry& title = graphics.entry(titlePageName);
-    drawer.draw(window, title, (screenWidth - title.width) / 2, 0);
+    drawer.draw(window, palettes, title, (screenWidth - title.width) / 2, 0);
   }
 
   if (menu.isOpen()) {
-    drawMenu(window, drawer, graphics, menu);
+    drawMenu(window, drawer, palettes, graphics, menu);
   }
 }

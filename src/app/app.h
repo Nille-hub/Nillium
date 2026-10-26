@@ -6,6 +6,7 @@
 #include "platform/video.h"
 #include "presentation/graphicstore.h"
 #include "presentation/patchdrawer.h"
+#include "presentation/texture.h"
 
 #include <filesystem>
 
@@ -20,6 +21,7 @@ private:
   Game m_game;
   Menu m_menu;
   Video m_video;
+  Texture m_palettes;
   GraphicStore m_graphics;
   PatchDrawer m_drawer;
 };

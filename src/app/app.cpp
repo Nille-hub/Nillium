@@ -6,6 +6,7 @@
 #include "game/variant.h"
 #include "platform/keys.h"
 #include "presentation/drawframe.h"
+#include "presentation/palettetexture.h"
 
 #include <chrono>
 #include <string>
@@ -60,8 +61,9 @@ MenuInput toMenuInput(Key key) {
 App::App(const std::filesystem::path& iwad)
     : m_wad(iwad),
       m_menu(variantOf(m_wad), episodesIn(m_wad)),
+      m_palettes(makePaletteTexture(readPalettes(m_wad))),
       m_graphics(m_wad, graphicNames(m_wad)),
-      m_drawer(readPalettes(m_wad)) {}
+      m_drawer() {}
 
 void App::run() {
   const Clock::time_point start = Clock::now();
@@ -90,7 +92,7 @@ void App::run() {
       m_menu.tic();
     }
 
-    drawFrame(m_video.framebufferSize(), m_drawer, m_graphics, m_game, m_menu);
+    drawFrame(m_video.framebufferSize(), m_drawer, m_palettes, m_graphics, m_game, m_menu);
 
     m_video.swapBuffers();
   }
