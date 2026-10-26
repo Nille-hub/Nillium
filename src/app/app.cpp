@@ -62,8 +62,7 @@ App::App(const std::filesystem::path& iwad)
     : m_wad(iwad),
       m_menu(variantOf(m_wad), episodesIn(m_wad)),
       m_palettes(makePaletteTexture(readPalettes(m_wad))),
-      m_graphics(m_wad, graphicNames(m_wad)),
-      m_drawer() {}
+      m_graphics(m_wad, graphicNames(m_wad)) {}
 
 void App::run() {
   const Clock::time_point start = Clock::now();
