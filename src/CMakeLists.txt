@@ -36,6 +36,8 @@ add_executable(
 	"presentation/graphicstore.cpp"
 	"presentation/menuview.h"
 	"presentation/menuview.cpp"
+	"presentation/linedrawer.h"
+	"presentation/linedrawer.cpp"
 	"presentation/palettetexture.h"
 	"presentation/palettetexture.cpp"
 	"presentation/patchdrawer.h"
