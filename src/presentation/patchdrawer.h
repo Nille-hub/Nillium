@@ -15,7 +15,8 @@ public:
   PatchDrawer();
 
   // Draws a graphic with its anchor at (x, y) in screen units, honouring its offsets.
-  void draw(FramebufferSize window, const Texture& palettes, const GraphicEntry& graphic, int x, int y) const;
+  void draw(FramebufferSize window, const Texture& palettes,
+            const GraphicEntry& graphic, int x, int y) const;
 
 private:
   ShaderProgram m_program;

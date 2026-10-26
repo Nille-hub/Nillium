@@ -2,9 +2,7 @@
 
 #include <glad/glad.h>
 
-#include <cstdint>
 #include <string_view>
-#include <vector>
 
 namespace {
 
@@ -47,7 +45,8 @@ void main() {
 
 PatchDrawer::PatchDrawer() : m_program(vertexSource, fragmentSource) {}
 
-void PatchDrawer::draw(FramebufferSize window, const Texture& palettes, const GraphicEntry& graphic, int x, int y) const {
+void PatchDrawer::draw(FramebufferSize window, const Texture& palettes,
+                       const GraphicEntry& graphic, int x, int y) const {
   const auto windowWidth = static_cast<float>(window.width);
   const auto windowHeight = static_cast<float>(window.height);
   if (windowWidth <= 0.0f || windowHeight <= 0.0f) {

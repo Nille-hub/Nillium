@@ -1,6 +1,10 @@
 #include "presentation/palettetexture.h"
 
+#include <cstdint>
+#include <vector>
+
 namespace {
+
 // One row per palette, 256 RGB texels per row.
 std::vector<std::uint8_t> paletteTexels(const std::array<Palette, paletteCount>& palettes) {
   std::vector<std::uint8_t> texels;
@@ -14,6 +18,7 @@ std::vector<std::uint8_t> paletteTexels(const std::array<Palette, paletteCount>&
   }
   return texels;
 }
+
 } //namespace
 
 Texture makePaletteTexture(const std::array<Palette, paletteCount>& palettes) {
