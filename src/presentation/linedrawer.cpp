@@ -62,7 +62,9 @@ void LineDrawer::draw(FramebufferSize window, const Texture& palettes, std::span
                       LineTransform transform) {
   m_vertices.upload(std::as_bytes(vertices));
   glViewport(0, 0, window.width, window.height);
-  glProgramUniform4f(m_program.id(), 0, transform.scaleX, transform.scaleY, transform.offsetX, transform.offsetY);
+  glProgramUniform4f(m_program.id(), 0,
+                     transform.scaleX, transform.scaleY,
+                     transform.offsetX, transform.offsetY);
   glUseProgram(m_program.id());
   glBindTextureUnit(1, palettes.id());
   glBindVertexArray(m_vertexArray.id());

@@ -13,4 +13,4 @@
 inline constexpr std::string_view titlePageName = "TITLEPIC";
 
 void drawFrame(FramebufferSize window, const PatchDrawer& drawer, const Texture& palettes,
-               LineDrawer &lines, const GraphicStore& graphics, const Game& game, const Menu& menu);
+               LineDrawer& lines, const GraphicStore& graphics, const Game& game, const Menu& menu);

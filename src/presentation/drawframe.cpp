@@ -5,7 +5,7 @@
 #include <glad/glad.h>
 
 void drawFrame(FramebufferSize window, const PatchDrawer& drawer, const Texture& palettes,
-               LineDrawer &lines, const GraphicStore& graphics, const Game& game, const Menu& menu) {
+               LineDrawer& lines, const GraphicStore& graphics, const Game& game, const Menu& menu) {
   glViewport(0, 0, window.width, window.height);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
