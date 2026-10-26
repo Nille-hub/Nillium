@@ -28,6 +28,8 @@ add_executable(
 	"platform/keys.h"
 	"platform/video.h"
 	"platform/video.cpp"
+	"presentation/buffer.h"
+	"presentation/buffer.cpp"
 	"presentation/drawframe.h"
 	"presentation/drawframe.cpp"
 	"presentation/graphicstore.h"
