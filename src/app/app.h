@@ -5,6 +5,7 @@
 #include "game/menu.h"
 #include "platform/video.h"
 #include "presentation/graphicstore.h"
+#include "presentation/linedrawer.h"
 #include "presentation/patchdrawer.h"
 #include "presentation/texture.h"
 
@@ -24,4 +25,5 @@ private:
   Texture m_palettes;
   GraphicStore m_graphics;
   PatchDrawer m_drawer;
+  LineDrawer m_lines;
 };

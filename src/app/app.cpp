@@ -91,7 +91,7 @@ void App::run() {
       m_menu.tic();
     }
 
-    drawFrame(m_video.framebufferSize(), m_drawer, m_palettes, m_graphics, m_game, m_menu);
+    drawFrame(m_video.framebufferSize(), m_drawer, m_palettes, m_lines, m_graphics, m_game, m_menu);
 
     m_video.swapBuffers();
   }
