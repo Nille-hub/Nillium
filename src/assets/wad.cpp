@@ -2,7 +2,6 @@
 #include "assets/bytes.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstdint>
 #include <fstream>
 #include <stdexcept>
@@ -11,7 +10,6 @@
 namespace {
 constexpr std::size_t headerSize = 12;
 constexpr std::size_t entrySize = 16;
-constexpr std::size_t nameSize = 8;
 
 std::vector<std::byte> readFile(const std::filesystem::path& path) {
   std::ifstream file(path, std::ios::binary);
@@ -30,22 +28,7 @@ std::vector<std::byte> readFile(const std::filesystem::path& path) {
   return data;
 }
 
-std::string toUpper(std::string_view text) {
-  std::string result(text);
 
-  for (char& c : result) {
-    c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
-  }
-
-  return result;
-}
-
-std::string readName(std::span<const std::byte> bytes, std::size_t offset) {
-  const auto* first = reinterpret_cast<const char*>(bytes.data() + offset);
-  const std::string_view raw(first, nameSize);
-
-  return toUpper(raw.substr(0, raw.find('\0')));
-}
 } // namespace
 
 Wad::Wad(const std::filesystem::path& path) : m_data(readFile(path)) {
@@ -85,7 +68,7 @@ Wad::Wad(const std::filesystem::path& path) : m_data(readFile(path)) {
 }
 
 bool Wad::contains(std::string_view name) const {
-  const std::string wanted = toUpper(name);
+  const std::string wanted = upperName(name);
   return std::any_of(m_directory.begin(), m_directory.end(),
                     [&](const Entry& entry){ return entry.name == wanted; });
 }
@@ -95,7 +78,7 @@ std::span<const std::byte> Wad::lump(std::string_view name) const {
 }
 
 std::size_t Wad::index(std::string_view name) const {
-  const std::string wanted = toUpper(name);
+  const std::string wanted = upperName(name);
   const auto found = std::find_if(m_directory.rbegin(), m_directory.rend(),
                                   [&](const Entry& entry) { return entry.name == wanted; });
   if (found == m_directory.rend()) {

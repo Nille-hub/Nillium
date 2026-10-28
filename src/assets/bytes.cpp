@@ -1,5 +1,7 @@
 #include "assets/bytes.h"
 
+constexpr std::size_t nameSize = 8;
+
 std::int16_t readInt16(std::span<const std::byte> bytes, std::size_t offset) {
   const auto low = std::to_integer<std::uint16_t>(bytes[offset]);
   const auto high = std::to_integer<std::uint16_t>(bytes[offset + 1]);
@@ -20,4 +22,21 @@ std::int32_t readInt32(std::span<const std::byte> bytes, std::size_t offset) {
   }
 
   return static_cast<std::int32_t>(value);
+}
+
+std::string upperName(std::string_view text) {
+  std::string result(text);
+
+  for (char& c : result) {
+    c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+  }
+
+  return result;
+}
+
+std::string readName(std::span<const std::byte> bytes, std::size_t offset) {
+  const auto* first = reinterpret_cast<const char*>(bytes.data() + offset);
+  const std::string_view raw(first, nameSize);
+
+  return upperName(raw.substr(0, raw.find('\0')));
 }
