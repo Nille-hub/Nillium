@@ -1,6 +1,11 @@
 #include "assets/bytes.h"
+#include <cctype>
+
+namespace {
 
 constexpr std::size_t nameSize = 8;
+
+} // namespace
 
 std::int16_t readInt16(std::span<const std::byte> bytes, std::size_t offset) {
   const auto low = std::to_integer<std::uint16_t>(bytes[offset]);

@@ -8,6 +8,7 @@
 #include <utility>
 
 namespace {
+
 constexpr std::size_t headerSize = 12;
 constexpr std::size_t entrySize = 16;
 
@@ -27,7 +28,6 @@ std::vector<std::byte> readFile(const std::filesystem::path& path) {
 
   return data;
 }
-
 
 } // namespace
 
