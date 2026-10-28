@@ -48,7 +48,7 @@ void drawMap(FramebufferSize window, LineDrawer& lines, const Texture& palettes,
   std::vector<LineVertex> lineVertices;
   lineVertices.reserve(map.linedefs.size() * 2);
   for (const MapLinedef& line : map.linedefs) {
-    const float lineColor = line.twoSided ? openingColor : wallColor;
+    const float lineColor = line.back.has_value() ? openingColor : wallColor;
     const MapVertex start = map.vertexes[line.start];
     lineVertices.push_back({static_cast<float>(start.x), static_cast<float>(start.y), lineColor});
     const MapVertex end = map.vertexes[line.end];
