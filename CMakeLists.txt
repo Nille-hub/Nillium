@@ -22,5 +22,16 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
+set(GLM_BUILD_LIBRARY OFF)
+set(GLM_BUILD_TESTS   OFF)
+set(GLM_BUILD_INSTALL OFF)
+
+FetchContent_Declare(
+	glm
+	GIT_REPOSITORY https://github.com/g-truc/glm.git
+	GIT_TAG        8d1fd52e5ab5590e2c81768ace50c72bae28f2ed # 1.0.3
+)
+FetchContent_MakeAvailable(glm)
+
 add_subdirectory("external/glad")
 add_subdirectory("src")
