@@ -14,6 +14,19 @@ struct MapVertex {
   int y = 0;
 };
 
+// A point in map units with a fractional part, as glBSP's split points have.
+struct MapPoint {
+  float x = 0.0f;
+  float y = 0.0f;
+};
+
+// A convex piece of one sector, from glBSP's GL nodes. The polygon's corners are in order
+// around its edge, so it can be drawn as a triangle fan.
+struct MapSubsector {
+  std::uint16_t sector = 0;  // index into MapData::sectors
+  std::vector<MapPoint> polygon;
+};
+
 struct MapSector {
   int floorHeight = 0;
   int ceilingHeight = 0;
@@ -57,9 +70,11 @@ struct MapData {
   std::vector<MapSidedef> sidedefs;
   std::vector<MapLinedef> linedefs;
   std::vector<MapThing> things;
+  std::vector<MapSubsector> subsectors;
 };
 
-// Reads the map whose marker lump is `name`, e.g. E1M1 or MAP01. Throws if the marker
-// is missing, the lumps after it are not in the expected order or have a broken size,
-// or any index (vertex, sidedef, sector) refers to something that does not exist.
+// Reads the map whose marker lump is `name`, e.g. E1M1 or MAP01, and its GL nodes after
+// the marker GL_<name>. Throws if a marker is missing, the lumps after it are not in the
+// expected order or have a broken size, the GL nodes are not glBSP version 2, or any index
+// refers to something that does not exist.
 MapData readMap(const Wad& wad, std::string_view name);

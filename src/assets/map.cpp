@@ -23,7 +23,7 @@ constexpr std::size_t mapThingRecordSize = 10;
 constexpr std::uint16_t noSidedef = 0xFFFF;
 
 std::span<const std::byte> readLump(const Wad& wad, std::size_t markerPos, std::size_t recordSize,
-                                    std::size_t offset, std::string_view wantedLumpName) {
+                                    std::size_t offset, std::string_view wantedLumpName, std::size_t headerSize) {
   const std::size_t position = markerPos + offset;
   const std::string_view nameAtOffset = wad.nameAt(position);
   if (wantedLumpName != nameAtOffset) {
@@ -34,10 +34,16 @@ std::span<const std::byte> readLump(const Wad& wad, std::size_t markerPos, std::
   }
 
   const std::span<const std::byte> lump = wad.lumpAt(position);
-  if (lump.size() % recordSize != 0) {
+  if (lump.size() < headerSize) {
     throw std::runtime_error(std::format(
-      "map {}: {} has {} bytes, not a multiple of {}",
-      wad.nameAt(markerPos), wantedLumpName, lump.size(), recordSize)
+      "map {}: {} has {} bytes, less than its {}-byte header",
+      wad.nameAt(markerPos), wantedLumpName, lump.size(), headerSize)
+    );
+  }
+  if ((lump.size() - headerSize) % recordSize != 0) {
+    throw std::runtime_error(std::format(
+      "map {}: {} has {} bytes after its {}-byte header, not a multiple of {}",
+      wad.nameAt(markerPos), wantedLumpName, lump.size() - headerSize, headerSize, recordSize)
     );
   }
   return lump;
@@ -50,7 +56,7 @@ MapData readMap(const Wad& wad, std::string_view name) {
   const std::size_t marker = wad.index(name);
 
   const std::span<const std::byte> vertexLump =
-    readLump(wad, marker, mapVertexRecordSize, mapVertexesOffsetFromMarker, "VERTEXES");
+    readLump(wad, marker, mapVertexRecordSize, mapVertexesOffsetFromMarker, "VERTEXES", 0);
   const std::size_t vertexCount = vertexLump.size() / mapVertexRecordSize;
   mapData.vertexes.reserve(vertexCount);
   for (std::size_t i = 0; i < vertexCount; ++i) {
@@ -61,7 +67,7 @@ MapData readMap(const Wad& wad, std::string_view name) {
   }
 
   const std::span<const std::byte> sectorLump =
-    readLump(wad, marker, mapSectorRecordSize, mapSectorsOffsetFromMarker, "SECTORS");
+    readLump(wad, marker, mapSectorRecordSize, mapSectorsOffsetFromMarker, "SECTORS", 0);
   const std::size_t sectorCount = sectorLump.size() / mapSectorRecordSize;
   mapData.sectors.reserve(sectorCount);
   for (std::size_t i = 0; i < sectorCount; ++i) {
@@ -79,7 +85,7 @@ MapData readMap(const Wad& wad, std::string_view name) {
   }
 
   const std::span<const std::byte> sidedefLump =
-    readLump(wad, marker, mapSidedefRecordSize, mapSidedefsOffsetFromMarker, "SIDEDEFS");
+    readLump(wad, marker, mapSidedefRecordSize, mapSidedefsOffsetFromMarker, "SIDEDEFS", 0);
   const std::size_t sidedefCount = sidedefLump.size() / mapSidedefRecordSize;
   mapData.sidedefs.reserve(sidedefCount);
   for (std::size_t i = 0; i < sidedefCount; ++i) {
@@ -105,7 +111,7 @@ MapData readMap(const Wad& wad, std::string_view name) {
   }
 
   const std::span<const std::byte> linedefLump =
-    readLump(wad, marker, mapLinedefRecordSize, mapLinedefsOffsetFromMarker, "LINEDEFS");
+    readLump(wad, marker, mapLinedefRecordSize, mapLinedefsOffsetFromMarker, "LINEDEFS", 0);
   const std::size_t linedefCount = linedefLump.size() / mapLinedefRecordSize;
   mapData.linedefs.reserve(linedefCount);
   for (std::size_t i = 0; i < linedefCount; ++i) {
@@ -142,7 +148,7 @@ MapData readMap(const Wad& wad, std::string_view name) {
   }
 
   const std::span<const std::byte> thingLump =
-    readLump(wad, marker, mapThingRecordSize, mapThingsOffsetFromMarker, "THINGS");
+    readLump(wad, marker, mapThingRecordSize, mapThingsOffsetFromMarker, "THINGS", 0);
   const std::size_t thingCount = thingLump.size() / mapThingRecordSize;
   mapData.things.reserve(thingCount);
   for (std::size_t i = 0; i < thingCount; ++i) {
