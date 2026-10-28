@@ -1,4 +1,5 @@
 #include "assets/bytes.h"
+
 #include <cctype>
 
 namespace {
