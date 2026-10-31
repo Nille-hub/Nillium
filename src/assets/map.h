@@ -33,6 +33,8 @@ struct MapSector {
   std::string floorFlat;
   std::string ceilingFlat;
   int light = 0;  // 0 (dark) to 255 (bright)
+  int special = 0;
+  int tag = 0;
 };
 
 // One side of a linedef. Texture names are "-" where vanilla draws nothing.
@@ -53,6 +55,8 @@ struct MapLinedef {
   std::uint16_t start = 0;  // index into MapData::vertexes
   std::uint16_t end = 0;    // index into MapData::vertexes
   std::uint16_t flags = 0;
+  int special = 0;
+  int tag = 0;
   std::uint16_t front = 0;              // index into MapData::sidedefs
   std::optional<std::uint16_t> back;    // index into MapData::sidedefs; none for a solid wall
 };
@@ -62,6 +66,7 @@ struct MapThing {
   int y = 0;
   int angle = 0;  // degrees, 0 = east, counter-clockwise
   int type = 0;   // 1 = player 1 start
+  std::uint16_t flags = 0;  // skill levels and multiplayer, as in vanilla doomdata.h
 };
 
 struct MapData {

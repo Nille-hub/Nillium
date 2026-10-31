@@ -96,12 +96,16 @@ MapData readMap(const Wad& wad, std::string_view name) {
     const std::int16_t floorHeight = readInt16(sectorLump, at);
     const std::int16_t ceilingHeight = readInt16(sectorLump, at + 2);
     const std::int16_t light = readInt16(sectorLump, at + 20);
+    const std::int16_t special = readInt16(sectorLump, at + 22);
+    const std::int16_t tag = readInt16(sectorLump, at + 24);
 
     mapData.sectors.push_back({
       floorHeight, ceilingHeight,
       readName(sectorLump, at + 4),
       readName(sectorLump, at + 12),
-      light
+      light,
+      special,
+      tag
     });
   }
 
@@ -140,6 +144,8 @@ MapData readMap(const Wad& wad, std::string_view name) {
     const std::uint16_t start = readUInt16(linedefLump, at);
     const std::uint16_t end = readUInt16(linedefLump, at + 2);
     const std::uint16_t flags = readUInt16(linedefLump, at + 4);
+    const std::int16_t special = readInt16(linedefLump, at + 6);
+    const std::int16_t tag = readInt16(linedefLump, at + 8);
     const std::uint16_t front = readUInt16(linedefLump, at + 10);
     const std::uint16_t rawBack = readUInt16(linedefLump, at + 12);
     const std::optional<std::uint16_t> back =
@@ -165,7 +171,7 @@ MapData readMap(const Wad& wad, std::string_view name) {
         name, i, *back, sidedefCount)
       );
     }
-    mapData.linedefs.push_back({start, end, flags, front, back});
+    mapData.linedefs.push_back({start, end, flags, special, tag, front, back});
   }
 
   const std::span<const std::byte> thingLump =
@@ -178,8 +184,9 @@ MapData readMap(const Wad& wad, std::string_view name) {
     const std::int16_t y = readInt16(thingLump, at + 2);
     const std::int16_t angle = readInt16(thingLump, at + 4);
     const std::int16_t type = readInt16(thingLump, at + 6);
+    const std::uint16_t flags = readUInt16(thingLump, at + 8);
 
-    mapData.things.push_back({x, y, angle, type});
+    mapData.things.push_back({x, y, angle, type, flags});
   }
 
   const std::string glMarkerName = "GL_" + std::string(name);
