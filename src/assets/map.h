@@ -84,6 +84,15 @@ struct MapNode {
   MapNodeChild back;
 };
 
+// The map divided into 128 x 128-unit cells, each listing the linedefs that touch it.
+struct MapBlockmap {
+  int originX = 0;
+  int originY = 0;
+  int columns = 0;
+  int rows = 0;
+  std::vector<std::vector<std::uint16_t>> cells;  // row-major, linedef indices per cell
+};
+
 struct MapData {
   std::vector<MapVertex> vertexes;
   std::vector<MapSector> sectors;
@@ -92,6 +101,8 @@ struct MapData {
   std::vector<MapThing> things;
   std::vector<MapSubsector> subsectors;
   std::vector<MapNode> nodes; // the root is the last node
+  MapBlockmap blockmap;
+  std::vector<std::uint8_t> reject;
 };
 
 // Reads the map whose marker lump is `name`, e.g. E1M1 or MAP01, and its GL nodes after

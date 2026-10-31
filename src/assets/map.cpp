@@ -17,6 +17,8 @@ constexpr std::size_t mapVertexesOffsetFromMarker = 4;
 constexpr std::size_t mapSectorsOffsetFromMarker = 8;
 constexpr std::size_t mapSidedefsOffsetFromMarker = 3;
 constexpr std::size_t mapThingsOffsetFromMarker = 1;
+constexpr std::size_t mapRejectOffsetFromMarker = 9;
+constexpr std::size_t mapBlockmapOffsetFromMarker = 10;
 constexpr std::size_t mapGlVertexesOffsetFromGlMarker = 1;
 constexpr std::size_t mapGlSegmentsOffsetFromGlMarker = 2;
 constexpr std::size_t mapGlSubsectorsOffsetFromGlMarker = 3;
@@ -26,6 +28,8 @@ constexpr std::size_t mapVertexRecordSize = 4;
 constexpr std::size_t mapSectorRecordSize = 26;
 constexpr std::size_t mapSidedefRecordSize = 30;
 constexpr std::size_t mapThingRecordSize = 10;
+constexpr std::size_t blockmapHeaderSize = 8;
+constexpr std::size_t blockmapWordSize = 2;
 constexpr std::size_t mapGlVertexHeaderSize = 4;
 constexpr std::size_t mapGlVertexRecordSize = 8;
 constexpr std::size_t mapGlSegmentRecordSize = 10;
@@ -36,6 +40,7 @@ constexpr std::uint16_t noLinedef = 0xFFFF;
 constexpr std::uint16_t glVertexFlag = 0x8000;
 constexpr std::uint16_t nodeChildSubsectorFlag = 0x8000;
 constexpr std::uint16_t nodeChildIndexMask = 0x7FFF;
+constexpr std::uint16_t blockListEnd = 0xFFFF;
 constexpr std::uint16_t glVertexMask = 0x7FFF;
 constexpr float fixedPointDivisor1616 = 65536.0f;
 
@@ -72,6 +77,77 @@ std::span<const std::byte> readLump(const Wad& wad, std::size_t markerPos, std::
     );
   }
   return lump;
+}
+
+// BLOCKMAP: a header, one offset per cell (in 16-bit words from the lump's start), then
+// each cell's list: a dummy entry vanilla skips, linedef numbers, and blockListEnd.
+MapBlockmap readBlockmap(std::span<const std::byte> lump, std::string_view mapName, std::size_t linedefCount) {
+  if (lump.size() < blockmapHeaderSize) {
+    throw std::runtime_error(std::format(
+      "map {}: BLOCKMAP has {} bytes, less than its header", mapName, lump.size()));
+  }
+
+  MapBlockmap blockmap;
+  blockmap.originX = readInt16(lump, 0);
+  blockmap.originY = readInt16(lump, 2);
+  blockmap.columns = readInt16(lump, 4);
+  blockmap.rows = readInt16(lump, 6);
+  if (blockmap.columns <= 0 || blockmap.rows <= 0) {
+    throw std::runtime_error(std::format(
+      "map {}: BLOCKMAP has {} x {} cells", mapName, blockmap.columns, blockmap.rows));
+  }
+
+  const std::size_t cellCount = static_cast<std::size_t>(blockmap.columns) * static_cast<std::size_t>(blockmap.rows);
+  if (blockmapHeaderSize + cellCount * blockmapWordSize > lump.size()) {
+    throw std::runtime_error(std::format(
+      "map {}: BLOCKMAP is too small for its {} cell offsets", mapName, cellCount));
+  }
+
+  blockmap.cells.reserve(cellCount);
+  for (std::size_t cell = 0; cell < cellCount; ++cell) {
+    const std::size_t listStart =
+      std::size_t{readUInt16(lump, blockmapHeaderSize + cell * blockmapWordSize)} * blockmapWordSize;
+
+    std::vector<std::uint16_t> linedefs;
+    for (std::size_t at = listStart + blockmapWordSize;; at += blockmapWordSize) {
+      if (at + blockmapWordSize > lump.size()) {
+        throw std::runtime_error(std::format(
+          "map {}: BLOCKMAP cell {} runs past the end of the lump", mapName, cell));
+      }
+      const std::uint16_t linedef = readUInt16(lump, at);
+      if (linedef == blockListEnd) {
+        break;
+      }
+      if (linedef >= linedefCount) {
+        throw std::runtime_error(std::format(
+          "map {}: BLOCKMAP cell {} refers to linedef {}, but the map has {} linedefs",
+          mapName, cell, linedef, linedefCount));
+      }
+      linedefs.push_back(linedef);
+    }
+    blockmap.cells.push_back(std::move(linedefs));
+  }
+  return blockmap;
+}
+
+// REJECT: one bit per pair of sectors. An empty lump means nothing is rejected.
+std::vector<std::uint8_t> readReject(std::span<const std::byte> lump, std::string_view mapName,
+                                     std::size_t sectorCount) {
+  const std::size_t requiredSize = (sectorCount * sectorCount + 7) / 8;
+  if (lump.empty()) {
+    return std::vector<std::uint8_t>(requiredSize, 0);
+  }
+  if (lump.size() < requiredSize) {
+    throw std::runtime_error(std::format(
+      "map {}: REJECT has {} bytes, but {} sectors need {}", mapName, lump.size(), sectorCount, requiredSize));
+  }
+
+  std::vector<std::uint8_t> reject;
+  reject.reserve(requiredSize);
+  for (std::size_t i = 0; i < requiredSize; ++i) {
+    reject.push_back(std::to_integer<std::uint8_t>(lump[i]));
+  }
+  return reject;
 }
 
 } // namespace
@@ -193,6 +269,8 @@ MapData readMap(const Wad& wad, std::string_view name) {
     mapData.things.push_back({x, y, angle, type, flags});
   }
 
+
+
   const std::string glMarkerName = "GL_" + std::string(name);
   if (!wad.contains(glMarkerName)) {
     throw std::runtime_error(std::format(
@@ -226,6 +304,14 @@ MapData readMap(const Wad& wad, std::string_view name) {
       static_cast<float>(y) / fixedPointDivisor1616
     });
   }
+
+  const std::span<const std::byte> blockmapLump =
+    readLump(wad, marker, blockmapWordSize, mapBlockmapOffsetFromMarker, "BLOCKMAP", 0);
+  mapData.blockmap = readBlockmap(blockmapLump, name, linedefCount);
+
+  const std::span<const std::byte> rejectLump =
+    readLump(wad, marker, 1, mapRejectOffsetFromMarker, "REJECT", 0);
+  mapData.reject = readReject(rejectLump, name, sectorCount);
 
   // A GL seg vertex number refers to GL_VERT if glVertexFlag is set, otherwise to VERTEXES.
   const auto resolveSegVertex = [&](std::uint16_t value, std::size_t seg) -> MapPoint {
