@@ -19,7 +19,8 @@ constexpr std::size_t mapSidedefsOffsetFromMarker = 3;
 constexpr std::size_t mapThingsOffsetFromMarker = 1;
 constexpr std::size_t mapGlVertexesOffsetFromGlMarker = 1;
 constexpr std::size_t mapGlSegmentsOffsetFromGlMarker = 2;
-constexpr std::size_t mapGlSubSectorsOffsetFromGlMarker = 3;
+constexpr std::size_t mapGlSubsectorsOffsetFromGlMarker = 3;
+constexpr std::size_t mapGlNodesOffsetFromGlMarker = 4;
 constexpr std::size_t mapLinedefRecordSize = 14;
 constexpr std::size_t mapVertexRecordSize = 4;
 constexpr std::size_t mapSectorRecordSize = 26;
@@ -28,10 +29,13 @@ constexpr std::size_t mapThingRecordSize = 10;
 constexpr std::size_t mapGlVertexHeaderSize = 4;
 constexpr std::size_t mapGlVertexRecordSize = 8;
 constexpr std::size_t mapGlSegmentRecordSize = 10;
-constexpr std::size_t mapGlSubSectorRecordSize = 4;
+constexpr std::size_t mapGlSubsectorRecordSize = 4;
+constexpr std::size_t mapGlNodeRecordSize = 28;
 constexpr std::uint16_t noSidedef = 0xFFFF;
 constexpr std::uint16_t noLinedef = 0xFFFF;
 constexpr std::uint16_t glVertexFlag = 0x8000;
+constexpr std::uint16_t nodeChildSubsectorFlag = 0x8000;
+constexpr std::uint16_t nodeChildIndexMask = 0x7FFF;
 constexpr std::uint16_t glVertexMask = 0x7FFF;
 constexpr float fixedPointDivisor1616 = 65536.0f;
 
@@ -274,12 +278,12 @@ MapData readMap(const Wad& wad, std::string_view name) {
   }
 
   const std::span<const std::byte> glSubSectorLump =
-    readLump(wad, glMarker, mapGlSubSectorRecordSize, mapGlSubSectorsOffsetFromGlMarker, "GL_SSECT", 0);
-  const std::size_t glSubSectorCount = glSubSectorLump.size() / mapGlSubSectorRecordSize;
+    readLump(wad, glMarker, mapGlSubsectorRecordSize, mapGlSubsectorsOffsetFromGlMarker, "GL_SSECT", 0);
+  const std::size_t glSubSectorCount = glSubSectorLump.size() / mapGlSubsectorRecordSize;
   mapData.subsectors.reserve(glSubSectorCount);
 
   for (std::size_t i = 0; i < glSubSectorCount; ++i) {
-    const std::size_t at = i * mapGlSubSectorRecordSize;
+    const std::size_t at = i * mapGlSubsectorRecordSize;
     const std::size_t count = readUInt16(glSubSectorLump, at);
     const std::size_t first = readUInt16(glSubSectorLump, at + 2);
     const std::size_t pastLast = first + count;
@@ -316,6 +320,39 @@ MapData readMap(const Wad& wad, std::string_view name) {
     const MapLinedef& line = mapData.linedefs[*seg.linedef];
     const MapSidedef& side = mapData.sidedefs[seg.side == 0 ? line.front : *line.back];
     mapData.subsectors.push_back({side.sector, std::move(polygon)});
+  }
+
+  const std::span<const std::byte> glNodeLump =
+    readLump(wad, glMarker, mapGlNodeRecordSize, mapGlNodesOffsetFromGlMarker, "GL_NODES", 0);
+  const std::size_t glNodeCount = glNodeLump.size() / mapGlNodeRecordSize;
+  mapData.nodes.reserve(glNodeCount);
+  const auto decodeAndValidate = [&](std::uint16_t encodedChild, std::size_t node) -> MapNodeChild {
+    const bool isSubsector = (encodedChild & nodeChildSubsectorFlag) != 0;
+    const std::uint16_t index = static_cast<std::uint16_t>(encodedChild & nodeChildIndexMask);
+    const std::size_t limit = isSubsector ? glSubSectorCount : glNodeCount;
+    if (index >= limit) {
+      throw std::runtime_error(std::format(
+        "map {}: GL node {} refers to {} {}, but the map has {}",
+        name, node, isSubsector ? "subsector" : "node", index, limit));
+    }
+    return { isSubsector, index };
+  };
+
+  for (std::size_t i = 0; i < glNodeCount; ++i) {
+    const std::size_t at = i * mapGlNodeRecordSize;
+    const std::int16_t x = readInt16(glNodeLump, at);
+    const std::int16_t y = readInt16(glNodeLump, at + 2);
+    const std::int16_t dx = readInt16(glNodeLump, at + 4);
+    const std::int16_t dy = readInt16(glNodeLump, at + 6);
+    const std::uint16_t frontChild = readUInt16(glNodeLump, at + 24);
+    const std::uint16_t backChild = readUInt16(glNodeLump, at + 26);
+
+    const MapPoint partitionStart = { static_cast<float>(x), static_cast<float>(y) };
+    const MapPoint partitionDirection = { static_cast<float>(dx), static_cast<float>(dy) };
+
+    mapData.nodes.push_back({
+      partitionStart, partitionDirection, decodeAndValidate(frontChild, i), decodeAndValidate(backChild, i)
+    });
   }
 
   return mapData;

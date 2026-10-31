@@ -69,6 +69,21 @@ struct MapThing {
   std::uint16_t flags = 0;  // skill levels and multiplayer, as in vanilla doomdata.h
 };
 
+// One side of a BSP node: either another node or a subsector.
+struct MapNodeChild {
+  bool isSubSector = false;
+  std::uint16_t index = 0;  // into MapData::nodes or MapData::subsectors
+};
+
+// A BSP node from GL_NODES: a partition line dividing space into a front and a back half.
+// A point is in front if it lies to the right of the line, seen from start along direction.
+struct MapNode {
+  MapPoint partitionStart;
+  MapPoint partitionDirection;
+  MapNodeChild front;
+  MapNodeChild back;
+};
+
 struct MapData {
   std::vector<MapVertex> vertexes;
   std::vector<MapSector> sectors;
@@ -76,6 +91,7 @@ struct MapData {
   std::vector<MapLinedef> linedefs;
   std::vector<MapThing> things;
   std::vector<MapSubsector> subsectors;
+  std::vector<MapNode> nodes; // the root is the last node
 };
 
 // Reads the map whose marker lump is `name`, e.g. E1M1 or MAP01, and its GL nodes after
