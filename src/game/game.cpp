@@ -2,11 +2,16 @@
 #include "game/mapgeometry.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <format>
 #include <numbers>
 #include <stdexcept>
 #include <string>
 #include <utility>
+
+
+constexpr int playerOneStart = 1;
+constexpr float viewHeight = 41.0f;
 
 GameMode Game::mode() const {
   return m_mode;
@@ -27,12 +32,10 @@ void Game::newGame(int episode, Skill skill, MapData map) {
   m_map = std::move(map);
 
   const auto playerThing = std::find_if(m_map.things.begin(), m_map.things.end(),
-                                          [](const MapThing &thing) {
-    return thing.type == 1;
-  });
+    [](const MapThing& thing) { return thing.type == playerOneStart; });
 
   if (playerThing == m_map.things.end()) {
-    throw std::runtime_error("Map has no player 1 start");
+    throw std::runtime_error("map has no player 1 start");
   }
 
   const std::uint16_t startPositionSectorIx =
@@ -40,7 +43,7 @@ void Game::newGame(int episode, Skill skill, MapData map) {
   m_viewpoint = {
     static_cast<float>(playerThing->x),
     static_cast<float>(playerThing->y),
-    static_cast<float>(m_map.sectors[startPositionSectorIx].floorHeight) + 41.0f,
+    static_cast<float>(m_map.sectors[startPositionSectorIx].floorHeight) + viewHeight,
     static_cast<float>(playerThing->angle) * std::numbers::pi_v<float> / 180.0f
   };
 }

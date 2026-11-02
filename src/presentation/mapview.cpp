@@ -9,8 +9,8 @@ namespace {
 constexpr float margin = 0.95f;
 constexpr float wallColor = 176.0f;
 constexpr float openingColor = 96.0f;
-constexpr float yellowColor = 231.0f;
-constexpr float fovProjectionDistance = 64.0f;
+constexpr float viewpointColor = 231.0f;
+constexpr float viewpointLineLength = 64.0f;
 
 } // namespace
 
@@ -57,9 +57,10 @@ void drawMap(FramebufferSize window, LineDrawer& lines, const Texture& palettes,
     const MapVertex end = map.vertexes[line.end];
     lineVertices.push_back({static_cast<float>(end.x), static_cast<float>(end.y), lineColor});
   }
-  float angle = viewpoint.angle;
-  lineVertices.push_back({viewpoint.x, viewpoint.y, yellowColor});
-  lineVertices.push_back({viewpoint.x + fovProjectionDistance * std::cos(angle), viewpoint.y + fovProjectionDistance * std::sin(angle), yellowColor});
+  const float angle = viewpoint.angle;
+  lineVertices.push_back({viewpoint.x, viewpoint.y, viewpointColor});
+  lineVertices.push_back({viewpoint.x + viewpointLineLength * std::cos(angle),
+                          viewpoint.y + viewpointLineLength * std::sin(angle), viewpointColor});
 
   lines.draw(window, palettes, lineVertices, transform);
 }
