@@ -9,9 +9,12 @@
 #include <string>
 #include <utility>
 
+namespace {
 
 constexpr int playerOneStart = 1;
 constexpr float viewHeight = 41.0f;
+
+} // namespace
 
 GameMode Game::mode() const {
   return m_mode;
