@@ -366,6 +366,9 @@ MapData readMap(const Wad& wad, std::string_view name) {
   const std::span<const std::byte> glSubSectorLump =
     readLump(wad, glMarker, mapGlSubsectorRecordSize, mapGlSubsectorsOffsetFromGlMarker, "GL_SSECT", 0);
   const std::size_t glSubSectorCount = glSubSectorLump.size() / mapGlSubsectorRecordSize;
+  if (glSubSectorCount == 0) {
+    throw std::runtime_error(std::format("map {}: Subsectors lump is empty", name));
+  }
   mapData.subsectors.reserve(glSubSectorCount);
 
   for (std::size_t i = 0; i < glSubSectorCount; ++i) {

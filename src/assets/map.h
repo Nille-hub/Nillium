@@ -71,7 +71,7 @@ struct MapThing {
 
 // One side of a BSP node: either another node or a subsector.
 struct MapNodeChild {
-  bool isSubSector = false;
+  bool isSubsector = false;
   std::uint16_t index = 0;  // into MapData::nodes or MapData::subsectors
 };
 
