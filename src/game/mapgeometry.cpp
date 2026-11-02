@@ -4,18 +4,18 @@
 #include <vector>
 
 namespace {
-
-bool isBehind(const MapPoint& point, const MapPoint& lineStart, const MapPoint& lineDirection) {
+// Vanilla R_PointOnSide: front only if the point is strictly right of the partition line.
+bool isInFront(const MapPoint& point, const MapPoint& lineStart, const MapPoint& lineDirection) {
   const float side = (point.x - lineStart.x) * lineDirection.y
                    - (point.y - lineStart.y) * lineDirection.x;
-  return side <= 0;
+  return side > 0;
 }
 
 std::uint16_t traverseBspForSubsector(const std::vector<MapNode>& nodes,
                                       std::size_t nodeIndex, const MapPoint& point) {
   const MapNode& node = nodes[nodeIndex];
-  const bool leftSide = isBehind(point, node.partitionStart, node.partitionDirection);
-  const MapNodeChild& child = leftSide ? node.back : node.front;
+  const MapNodeChild& child = isInFront(point, node.partitionStart, node.partitionDirection)
+                            ? node.back : node.front;
   if (child.isSubsector) {
     return child.index;
   }
