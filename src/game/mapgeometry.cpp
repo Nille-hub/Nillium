@@ -15,7 +15,7 @@ std::uint16_t traverseBspForSubsector(const std::vector<MapNode>& nodes,
                                       std::size_t nodeIndex, const MapPoint& point) {
   const MapNode& node = nodes[nodeIndex];
   const MapNodeChild& child = isInFront(point, node.partitionStart, node.partitionDirection)
-                            ? node.back : node.front;
+                            ? node.front : node.back;
   if (child.isSubsector) {
     return child.index;
   }
