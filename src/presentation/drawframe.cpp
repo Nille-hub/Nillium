@@ -15,7 +15,7 @@ void drawFrame(FramebufferSize window, const PatchDrawer& drawer, const Texture&
     const GraphicEntry& title = graphics.entry(titlePageName);
     drawer.draw(window, palettes, title, (screenWidth - title.width) / 2, 0);
   } else {
-    drawMap(window, lines, palettes, game.map());
+    drawMap(window, lines, palettes, game.map(), game.viewpoint());
   }
 
   if (menu.isOpen()) {
