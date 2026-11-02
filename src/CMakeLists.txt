@@ -20,6 +20,8 @@ add_executable(
 	"assets/wad.cpp"
 	"game/game.h"
 	"game/game.cpp"
+	"game/mapgeometry.h"
+	"game/mapgeometry.cpp"
 	"game/menu.h"
 	"game/menu.cpp"
 	"game/menudefs.h"
