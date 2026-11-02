@@ -100,13 +100,13 @@ struct MapData {
   std::vector<MapLinedef> linedefs;
   std::vector<MapThing> things;
   std::vector<MapSubsector> subsectors;
-  std::vector<MapNode> nodes; // the root is the last node
+  std::vector<MapNode> nodes;  // the root is the last node
   MapBlockmap blockmap;
   std::vector<std::uint8_t> reject;
 };
 
-// Reads the map whose marker lump is `name`, e.g. E1M1 or MAP01, and its GL nodes after
-// the marker GL_<name>. Throws if a marker is missing, the lumps after it are not in the
-// expected order or have a broken size, the GL nodes are not glBSP version 2, or any index
-// refers to something that does not exist.
+// Reads the map whose marker lump is `name`, e.g. E1M1 or MAP01, the blockmap and reject table,
+// and its GL nodes after the marker GL_<name>. Throws if a marker is missing, the lumps after it
+// are not in the expected order or have a broken size, the GL nodes are not glBSP version 2,
+// or any index refers to something that does not exist.
 MapData readMap(const Wad& wad, std::string_view name);
