@@ -32,6 +32,8 @@ add_executable(
 	"platform/video.cpp"
 	"presentation/buffer.h"
 	"presentation/buffer.cpp"
+	"presentation/camera.h"
+	"presentation/camera.cpp"
 	"presentation/drawframe.h"
 	"presentation/drawframe.cpp"
 	"presentation/graphicstore.h"
