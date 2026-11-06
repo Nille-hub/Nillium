@@ -13,6 +13,7 @@
 
 inline constexpr std::string_view titlePageName = "TITLEPIC";
 
+// `world` is null before the first new game.
 void drawFrame(FramebufferSize window, const PatchDrawer& drawer, const Texture& palettes,
-               LineDrawer& lines, const GraphicStore& graphics, WorldRenderer* world, // null before the first new
+               LineDrawer& lines, const GraphicStore& graphics, WorldRenderer* world,
                const Game& game, const Menu& menu);
