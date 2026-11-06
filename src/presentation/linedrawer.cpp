@@ -62,6 +62,7 @@ void LineDrawer::draw(FramebufferSize window, const Texture& palettes, std::span
                       LineTransform transform) {
   m_vertices.upload(std::as_bytes(vertices));
   glViewport(0, 0, window.width, window.height);
+  glDisable(GL_DEPTH_TEST);
   glProgramUniform4f(m_program.id(), 0,
                      transform.scaleX, transform.scaleY,
                      transform.offsetX, transform.offsetY);

@@ -23,6 +23,7 @@ struct WorldVertex {
   std::uint32_t front = 0;  // sector index
   std::uint32_t back = 0;   // sector index; equal to front for flats and one-sided walls
   WorldPart part = WorldPart::FrontFloor;
+  float shade = 1.0f;  // temporary until textures exist: flats drawn darker than walls
 };
 
 // The level's walls, floors and ceilings as triangles, three vertices each. Every two-sided

@@ -77,6 +77,7 @@ void PatchDrawer::draw(FramebufferSize window, const Texture& palettes,
   const auto toNdcY = [&](float py) { return 1.0f - py / windowHeight * 2.0f; };
 
   glViewport(0, 0, window.width, window.height);
+  glDisable(GL_DEPTH_TEST);
   glProgramUniform4f(m_program.id(), 0, toNdcX(left), toNdcY(top), toNdcX(right), toNdcY(bottom));
   glUseProgram(m_program.id());
   glBindTextureUnit(0, graphic.texture.id());

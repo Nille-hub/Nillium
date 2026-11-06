@@ -22,9 +22,9 @@ void addWallQuad(std::vector<WorldVertex>& vertices, MapPoint a, MapPoint b, std
 void addFlat(std::vector<WorldVertex>& vertices, const std::vector<MapPoint>& polygon, std::uint32_t sector,
              WorldPart part) {
   for (std::size_t i = 1; i + 1 < polygon.size(); ++i) {
-    vertices.push_back({polygon[0].x, polygon[0].y, sector, sector, part});
-    vertices.push_back({polygon[i].x, polygon[i].y, sector, sector, part});
-    vertices.push_back({polygon[i + 1].x, polygon[i + 1].y, sector, sector, part});
+    vertices.push_back({polygon[0].x, polygon[0].y, sector, sector, part, 0.6f});
+    vertices.push_back({polygon[i].x, polygon[i].y, sector, sector, part, 0.6f});
+    vertices.push_back({polygon[i + 1].x, polygon[i + 1].y, sector, sector, part, 0.6f});
   }
 }
 } // namespace
