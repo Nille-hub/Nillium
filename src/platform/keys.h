@@ -6,6 +6,7 @@ enum class Key {
   Enter,
   Escape,
   Backspace,
+  Tab,
   Other
 };
 

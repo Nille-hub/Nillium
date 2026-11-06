@@ -49,6 +49,8 @@ void Game::newGame(int episode, Skill skill, MapData map) {
     static_cast<float>(m_map.sectors[startPositionSectorIx].floorHeight) + viewHeight,
     static_cast<float>(playerThing->angle) * std::numbers::pi_v<float> / 180.0f
   };
+
+  m_automapOpen = false;
 }
 
 std::string firstMapName(GameVariant variant, int episode) {
@@ -57,4 +59,12 @@ std::string firstMapName(GameVariant variant, int episode) {
   }
 
   return std::format("E{}M1", episode);
+}
+
+bool Game::automapOpen() const {
+  return m_automapOpen;
+}
+
+void Game::toggleAutomap() {
+  m_automapOpen = !m_automapOpen;
 }

@@ -16,6 +16,7 @@ Key translate(int glfwKey) {
   case GLFW_KEY_KP_ENTER:   return Key::Enter;
   case GLFW_KEY_ESCAPE:     return Key::Escape;
   case GLFW_KEY_BACKSPACE:  return Key::Backspace;
+  case GLFW_KEY_TAB:        return Key::Tab;
   default:                  return Key::Other;
   }
 }

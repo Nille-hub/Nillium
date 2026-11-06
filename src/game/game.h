@@ -33,6 +33,8 @@ public:
   const Viewpoint& viewpoint() const;
 
   void newGame(int episode, Skill skill, MapData map);
+  bool automapOpen() const;
+  void toggleAutomap();
 
 private:
   GameMode m_mode = GameMode::Title;
@@ -40,6 +42,7 @@ private:
   Skill m_skill = Skill::Medium;
   MapData m_map;
   Viewpoint m_viewpoint;
+  bool m_automapOpen = false;
 };
 
 // The first map of an episode: E<episode>M1 for Doom, MAP01 for Doom II.

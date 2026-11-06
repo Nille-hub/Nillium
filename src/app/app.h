@@ -8,8 +8,10 @@
 #include "presentation/linedrawer.h"
 #include "presentation/patchdrawer.h"
 #include "presentation/texture.h"
+#include "presentation/worldrenderer.h"
 
 #include <filesystem>
+#include <optional>
 
 class App {
 public:
@@ -26,4 +28,5 @@ private:
   GraphicStore m_graphics;
   PatchDrawer m_drawer;
   LineDrawer m_lines;
+  std::optional<WorldRenderer> m_world;
 };

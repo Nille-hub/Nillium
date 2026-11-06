@@ -7,10 +7,12 @@
 #include "presentation/linedrawer.h"
 #include "presentation/patchdrawer.h"
 #include "presentation/texture.h"
+#include "presentation/worldrenderer.h"
 
 #include <string_view>
 
 inline constexpr std::string_view titlePageName = "TITLEPIC";
 
 void drawFrame(FramebufferSize window, const PatchDrawer& drawer, const Texture& palettes,
-               LineDrawer& lines, const GraphicStore& graphics, const Game& game, const Menu& menu);
+               LineDrawer& lines, const GraphicStore& graphics, WorldRenderer* world, // null before the first new
+               const Game& game, const Menu& menu);

@@ -71,6 +71,7 @@ void App::run() {
 
   while (!m_video.closeRequested() && !quitChosen) {
     for (const KeyEvent& event : m_video.pollEvents()) {
+      const bool menuWasOpen = m_menu.isOpen();
       const MenuAction action = m_menu.respond(toMenuInput(event.key), m_game.mode());
       switch (action.kind) {
       case MenuAction::Kind::None:
@@ -78,11 +79,16 @@ void App::run() {
       case MenuAction::Kind::NewGame: {
         MapData map = readMap(m_wad, firstMapName(variantOf(m_wad), action.episode));
         m_game.newGame(action.episode, action.skill, std::move(map));
+        m_world.emplace(m_game.map());
         break;
       }
       case MenuAction::Kind::Quit:
         quitChosen = true;
         break;
+      }
+
+      if (!menuWasOpen && event.key == Key::Tab && m_game.mode() == GameMode::Level) {
+        m_game.toggleAutomap();
       }
     }
 
@@ -91,7 +97,8 @@ void App::run() {
       m_menu.tic();
     }
 
-    drawFrame(m_video.framebufferSize(), m_drawer, m_palettes, m_lines, m_graphics, m_game, m_menu);
+    drawFrame(m_video.framebufferSize(), m_drawer, m_palettes, m_lines, m_graphics,
+              m_world ? &*m_world : nullptr, m_game, m_menu);
 
     m_video.swapBuffers();
   }
