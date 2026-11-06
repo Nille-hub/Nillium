@@ -116,8 +116,9 @@ WorldRenderer::WorldRenderer(const MapData& map) : m_program(vertexSource, fragm
   glVertexArrayAttribBinding(vao, 4, bindingIndex);
 }
 
-void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint, std::span<const MapSector> sectors) {
-  if (window.height == 0 || window.width == 0) {
+void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint,
+                         std::span<const MapSector> sectors) {
+  if (window.height <= 0 || window.width <= 0) {
     return;
   }
 
