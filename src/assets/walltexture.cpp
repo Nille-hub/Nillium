@@ -1,4 +1,4 @@
-#include "assets/texture.h"
+#include "assets/walltexture.h"
 #include "assets/bytes.h"
 
 #include <cstdint>
