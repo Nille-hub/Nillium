@@ -16,6 +16,8 @@ add_executable(
 	"assets/map.cpp"
 	"assets/palette.h"
 	"assets/palette.cpp"
+	"assets/texture.h"
+	"assets/texture.cpp"
 	"assets/wad.h"
 	"assets/wad.cpp"
 	"game/game.h"
