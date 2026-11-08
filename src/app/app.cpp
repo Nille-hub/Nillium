@@ -79,7 +79,7 @@ void App::run() {
       case MenuAction::Kind::NewGame: {
         MapData map = readMap(m_wad, firstMapName(variantOf(m_wad), action.episode));
         m_game.newGame(action.episode, action.skill, std::move(map));
-        m_world.emplace(m_game.map());
+        m_world.emplace(m_wad, m_game.map());
         break;
       }
       case MenuAction::Kind::Quit:

@@ -15,7 +15,34 @@ struct SectorState {
   float floorHeight;
   float ceilingHeight;
   float light;
+  std::uint32_t floorLayer;
+  std::uint32_t ceilingLayer;
 };
+
+struct SidedefState {
+  std::uint32_t upperLayer;
+  std::uint32_t middleLayer;
+  std::uint32_t lowerLayer;
+  float xOffset;
+  float yOffset;
+};
+
+constexpr GLuint bindingIndex = 0;
+constexpr GLuint sectorStatesBinding = 0;
+constexpr GLuint sidedefStatesBinding = 1;
+constexpr std::uint32_t noLayer = 0xFFFFFFFF;
+constexpr float maxLight = 255.0f;
+
+std::uint32_t wallLayerOrNone(const LevelTextures& textures, const std::string& name) {
+  return name != noTexture ? textures.wallLayer(name) : noLayer;
+}
+
+SidedefState sidedefState(const LevelTextures& textures, const MapSidedef& sidedef) {
+  return { wallLayerOrNone(textures, sidedef.upperTexture),
+           wallLayerOrNone(textures, sidedef.middleTexture),
+           wallLayerOrNone(textures, sidedef.lowerTexture), static_cast<float>(sidedef.xOffset),
+           static_cast<float>(sidedef.yOffset) };
+}
 
 constexpr std::string_view vertexSource = R"glsl(
 #version 460 core
@@ -30,6 +57,8 @@ struct Sector {
   float floorHeight;
   float ceilingHeight;
   float light;
+  uint floorLayer;
+  uint ceilingLayer;
 };
 
 layout(std430, binding = 0) readonly buffer SectorStates {
@@ -79,13 +108,10 @@ void main() {
 }
 )glsl";
 
-constexpr GLuint bindingIndex = 0;
-constexpr GLuint sectorStatesBinding = 0;
-constexpr float maxLight = 255.0f;
-
 } // namespace
 
-WorldRenderer::WorldRenderer(const MapData& map) : m_program(vertexSource, fragmentSource) {
+WorldRenderer::WorldRenderer(const Wad& wad, const MapData& map)
+    : m_program(vertexSource, fragmentSource), m_textures(wad, map) {
   const std::vector<WorldVertex> vertices = buildWorldGeometry(map);
   m_vertices.upload(std::as_bytes(std::span(vertices)));
   m_vertexCount = static_cast<GLsizei>(vertices.size());
@@ -117,7 +143,8 @@ WorldRenderer::WorldRenderer(const MapData& map) : m_program(vertexSource, fragm
 }
 
 void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint,
-                         std::span<const MapSector> sectors) {
+                         std::span<const MapSector> sectors,
+                         std::span<const MapSidedef> sidedefs) {
   if (window.height <= 0 || window.width <= 0) {
     return;
   }
@@ -126,11 +153,24 @@ void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint,
   sectorStates.reserve(sectors.size());
 
   for (const MapSector& sector : sectors) {
-    sectorStates.push_back({static_cast<float>(sector.floorHeight), static_cast<float>(sector.ceilingHeight),
-                            static_cast<float>(sector.light) / maxLight});
+    sectorStates.push_back(
+      { static_cast<float>(sector.floorHeight),
+        static_cast<float>(sector.ceilingHeight),
+        static_cast<float>(sector.light) / maxLight,
+        m_textures.flatLayer(sector.floorFlat),
+        m_textures.flatLayer(sector.ceilingFlat) }
+    );
+  }
+
+  std::vector<SidedefState> sidedefStates;
+  sidedefStates.reserve(sidedefs.size());
+
+  for (const MapSidedef& sidedef : sidedefs) {
+    sidedefStates.push_back(sidedefState(m_textures, sidedef));
   }
 
   m_sectorStates.upload(std::as_bytes(std::span(sectorStates)));
+  m_sidedefStates.upload(std::as_bytes(std::span(sidedefStates)));
 
   glViewport(0, 0, window.width, window.height);
   glEnable(GL_DEPTH_TEST);
@@ -139,6 +179,7 @@ void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint,
     m_program.id(), 0, 1, GL_FALSE, glm::value_ptr(viewProjection(viewpoint, window)));
   glUseProgram(m_program.id());
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, sectorStatesBinding, m_sectorStates.id());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, sidedefStatesBinding, m_sidedefStates.id());
   glBindVertexArray(m_vertexArray.id());
   glDrawArrays(GL_TRIANGLES, 0, m_vertexCount);
 }

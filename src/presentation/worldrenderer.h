@@ -1,9 +1,11 @@
 #pragma once
 
 #include "assets/map.h"
+#include "assets/wad.h"
 #include "game/game.h"
 #include "platform/video.h"
 #include "presentation/buffer.h"
+#include "presentation/leveltextures.h"
 #include "presentation/shaderprogram.h"
 #include "presentation/vertexarray.h"
 
@@ -15,15 +17,18 @@
 // map; the sector heights and light levels are uploaded on every draw.
 class WorldRenderer {
 public:
-  explicit WorldRenderer(const MapData& map);
+  WorldRenderer(const Wad& wad, const MapData& map);
 
   // Not const: each call replaces the sector state buffer's contents.
-  void draw(FramebufferSize window, const Viewpoint& viewpoint, std::span<const MapSector> sectors);
+  void draw(FramebufferSize window, const Viewpoint& viewpoint, std::span<const MapSector> sectors,
+            std::span<const MapSidedef> sidedefs);
 
 private:
   ShaderProgram m_program;
+  LevelTextures m_textures;
   Buffer m_vertices;
   Buffer m_sectorStates;
+  Buffer m_sidedefStates;
   VertexArray m_vertexArray;
   GLsizei m_vertexCount = 0;
 };

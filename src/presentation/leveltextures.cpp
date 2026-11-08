@@ -14,8 +14,6 @@
 
 namespace {
 
-constexpr std::string_view noTexture = "-";
-
 std::map<std::string, std::uint32_t, std::less<>> layerIndex(const std::vector<std::string>& names,
                                                              std::uint32_t firstLayer) {
   std::map<std::string, std::uint32_t, std::less<>> layers;

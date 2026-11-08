@@ -37,7 +37,10 @@ struct MapSector {
   int tag = 0;
 };
 
-// One side of a linedef. Texture names are "-" where vanilla draws nothing.
+// The texture name sidedefs use where vanilla draws nothing.
+inline constexpr std::string_view noTexture = "-";
+
+// One side of a linedef.
 struct MapSidedef {
   int xOffset = 0;
   int yOffset = 0;
