@@ -42,6 +42,8 @@ add_executable(
 	"presentation/drawframe.cpp"
 	"presentation/graphicstore.h"
 	"presentation/graphicstore.cpp"
+	"presentation/leveltextures.h"
+	"presentation/leveltextures.cpp"
 	"presentation/linedrawer.h"
 	"presentation/linedrawer.cpp"
 	"presentation/mapview.h"
