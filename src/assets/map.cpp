@@ -48,6 +48,7 @@ struct RawGlSeg {
   std::uint16_t startValue;
   std::uint16_t endValue;
   MapPoint start;
+  MapPoint end;
   std::optional<std::uint16_t> linedef;
   std::uint16_t side;
 };
@@ -346,7 +347,7 @@ MapData readMap(const Wad& wad, std::string_view name) {
     const std::uint16_t side = readUInt16(glSegmentLump, at + 6);
 
     const MapPoint start = resolveSegVertex(startValue, i);
-    resolveSegVertex(endValue, i);  // only validates: the end point is the next seg's start
+    const MapPoint end = resolveSegVertex(endValue, i);
 
     const std::optional<std::uint16_t> linedef =
       linedefValue != noLinedef ? std::optional{linedefValue} : std::nullopt;
@@ -360,7 +361,7 @@ MapData readMap(const Wad& wad, std::string_view name) {
         "map {}: GL seg {} lies on side {} of linedef {}, which has no such side", name, i, side, *linedef));
     }
 
-    rawGlSegments.push_back({startValue, endValue, start, linedef, side});
+    rawGlSegments.push_back({startValue, endValue, start, end, linedef, side});
   }
 
   const std::span<const std::byte> glSubSectorLump =
@@ -384,18 +385,19 @@ MapData readMap(const Wad& wad, std::string_view name) {
     }
 
     std::vector<MapPoint> polygon;
-    polygon.reserve(count);
+    polygon.reserve(count * 2);
     std::optional<std::size_t> sectorSeg;
 
     for (std::size_t s = first; s < pastLast; ++s) {
       const RawGlSeg& seg = rawGlSegments[s];
       const std::size_t next = (s + 1 == pastLast) ? first : s + 1;
-      if (seg.endValue != rawGlSegments[next].startValue) {
-        throw std::runtime_error(std::format(
-          "map {}: GL subsector {} is not closed: seg {} does not end where seg {} starts", name, i, s, next));
-      }
 
       polygon.push_back(seg.start);
+      // glBSP leaves small gaps in subsectors of slightly broken maps; keep the corner anyway.
+      const MapPoint& nextStart = rawGlSegments[next].start;
+      if (seg.end.x != nextStart.x || seg.end.y != nextStart.y) {
+        polygon.push_back(seg.end);
+      }
       if (!sectorSeg && seg.linedef) {
         sectorSeg = s;
       }
