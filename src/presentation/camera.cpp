@@ -10,7 +10,6 @@ constexpr float nearPlane = 4.0f;
 constexpr float farPlane = 32768.0f;
 constexpr float halfFovTangent = 0.75f;
 
-
 } // namespace
 
 glm::mat4 viewProjection(const Viewpoint& viewpoint, FramebufferSize window) {
