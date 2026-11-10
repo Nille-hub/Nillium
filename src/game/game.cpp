@@ -64,7 +64,7 @@ void Game::toggleAutomap() {
 
 void Game::tic() {
   if (m_mode == GameMode::Level) {
-      m_levelTime++;
+    m_levelTime++;
   }
 }
 
