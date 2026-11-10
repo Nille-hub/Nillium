@@ -95,6 +95,10 @@ void App::run() {
     const int nowTic = ticsSince(start);
     for (; lastTic < nowTic; ++lastTic) {
       m_menu.tic();
+      // Vanilla pauses SP game while menu is open.
+      if (!m_menu.isOpen()) {
+        m_game.tic();
+      }
     }
 
     drawFrame(m_video.framebufferSize(), m_drawer, m_palettes, m_lines, m_graphics,

@@ -51,14 +51,7 @@ void Game::newGame(int episode, Skill skill, MapData map) {
   };
 
   m_automapOpen = false;
-}
-
-std::string firstMapName(GameVariant variant, int episode) {
-  if (variant == GameVariant::Doom2) {
-    return "MAP01";
-  }
-
-  return std::format("E{}M1", episode);
+  m_levelTime = 0;
 }
 
 bool Game::automapOpen() const {
@@ -67,4 +60,22 @@ bool Game::automapOpen() const {
 
 void Game::toggleAutomap() {
   m_automapOpen = !m_automapOpen;
+}
+
+void Game::tic() {
+  if (m_mode == GameMode::Level) {
+      m_levelTime++;
+  }
+}
+
+int Game::levelTime() const {
+  return m_levelTime;
+}
+
+std::string firstMapName(GameVariant variant, int episode) {
+  if (variant == GameVariant::Doom2) {
+    return "MAP01";
+  }
+
+  return std::format("E{}M1", episode);
 }

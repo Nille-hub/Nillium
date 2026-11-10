@@ -36,9 +36,16 @@ public:
   bool automapOpen() const;
   void toggleAutomap();
 
+  // Advances the running level by one tic. Does nothing on the title screen.
+  void tic();
+
+  // Tics since the current level started, like vanilla's leveltime.
+  int levelTime() const;
+
 private:
   GameMode m_mode = GameMode::Title;
   int m_episode = 1;
+  int m_levelTime = 0;
   Skill m_skill = Skill::Medium;
   MapData m_map;
   Viewpoint m_viewpoint;
