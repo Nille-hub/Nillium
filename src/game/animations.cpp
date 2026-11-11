@@ -31,11 +31,11 @@ constexpr std::array<std::string_view, 4> wfall{"WFALL1", "WFALL2", "WFALL3", "W
 constexpr std::array<std::string_view, 4> dbrain{"DBRAIN1", "DBRAIN2", "DBRAIN3", "DBRAIN4"};
 
 constexpr std::array<AnimationDef, 22> definitions{{
-    {false, nukage}, {false, fwater}, {false, swater}, {false, lava}, {false, blood},
-    {false, rrock}, {false, slimeA}, {false, slimeB}, {false, slimeC},
-    {true, blodgr}, {true, sladrip}, {true, blodrip}, {true, firewall}, {true, gstfont},
-    {true, firelava}, {true, firemag}, {true, fireblu}, {true, rockred},
-    {true, bfall}, {true, sfall}, {true, wfall}, {true, dbrain},
+  {false, nukage}, {false, fwater}, {false, swater}, {false, lava}, {false, blood},
+  {false, rrock}, {false, slimeA}, {false, slimeB}, {false, slimeC},
+  {true, blodgr}, {true, sladrip}, {true, blodrip}, {true, firewall}, {true, gstfont},
+  {true, firelava}, {true, firemag}, {true, fireblu}, {true, rockred},
+  {true, bfall}, {true, sfall}, {true, wfall}, {true, dbrain},
 }};
 
 } // namespace
