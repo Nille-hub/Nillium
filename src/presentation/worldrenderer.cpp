@@ -1,12 +1,13 @@
 #include "presentation/worldrenderer.h"
-
 #include "presentation/camera.h"
 #include "presentation/worldgeometry.h"
+#include "game/animations.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
 #include <cstddef>
 #include <cstdint>
+#include <numeric>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -50,6 +51,7 @@ struct LayerSize {
 layout(std430, binding = 0) readonly buffer SectorStates { Sector sectors[]; };
 layout(std430, binding = 1) readonly buffer SidedefStates { Sidedef sidedefs[]; };
 layout(std430, binding = 2) readonly buffer LayerSizes { LayerSize layerSizes[]; };
+layout(std430, binding = 3) readonly buffer Translations { uint translations[]; };
 
 layout(location = 0) uniform mat4 viewProjection;
 
@@ -72,6 +74,11 @@ const uint noLayer = 0xFFFFFFFFu;
 const uint upperUnpegged = 0x0008u;
 const uint lowerUnpegged = 0x0010u;
 
+// The layer an animated texture currently shows; all other layers map to themselves.
+uint currentLayer(uint l) {
+  return l == noLayer ? noLayer : translations[l];
+}
+
 float textureHeight(uint l) {
   return l == noLayer ? 0.0 : float(layerSizes[l].height);
 }
@@ -84,7 +91,7 @@ void main() {
   if (part == FrontFloor || part == FrontCeiling) {
     // Flats lie on vanilla's fixed 64-unit world grid; texture rows run southward.
     z = (part == FrontFloor) ? f.floorHeight : f.ceilingHeight;
-    layer = (part == FrontFloor) ? f.floorLayer : f.ceilingLayer;
+    layer = currentLayer((part == FrontFloor) ? f.floorLayer : f.ceilingLayer);
     brightness = f.light;
     texel = vec2(position.x, -position.y);
   } else {
@@ -99,14 +106,14 @@ void main() {
       side = sidedefs[frontSide];
       bottom = f.floorHeight;
       top = f.ceilingHeight;
-      layer = side.middleLayer;
+      layer = currentLayer(side.middleLayer);
       anchor = ((flags & lowerUnpegged) != 0u) ? bottom + textureHeight(layer) : top;
     } else if (part == LowerBottom || part == LowerTop) {
       frontVisible = f.floorHeight <= b.floorHeight;  // seen from the lower floor's side
       side = sidedefs[frontVisible ? frontSide : backSide];
       bottom = min(f.floorHeight, b.floorHeight);
       top = max(f.floorHeight, b.floorHeight);
-      layer = side.lowerLayer;
+      layer = currentLayer(side.lowerLayer);
       float visibleCeiling = frontVisible ? f.ceilingHeight : b.ceilingHeight;
       anchor = ((flags & lowerUnpegged) != 0u) ? visibleCeiling : top;
     } else {
@@ -114,7 +121,7 @@ void main() {
       side = sidedefs[frontVisible ? frontSide : backSide];
       bottom = min(f.ceilingHeight, b.ceilingHeight);
       top = max(f.ceilingHeight, b.ceilingHeight);
-      layer = side.upperLayer;
+      layer = currentLayer(side.upperLayer);
       anchor = ((flags & upperUnpegged) != 0u) ? top : bottom + textureHeight(layer);
     }
 
@@ -183,6 +190,7 @@ constexpr GLuint bindingIndex = 0;
 constexpr GLuint sectorStatesBinding = 0;
 constexpr GLuint sidedefStatesBinding = 1;
 constexpr GLuint layerSizesBinding = 2;
+constexpr GLuint translationsBinding = 3;
 constexpr GLuint textureArrayUnit = 0;
 constexpr GLuint paletteUnit = 1;
 constexpr std::uint32_t noLayer = 0xFFFFFFFF;
@@ -237,7 +245,8 @@ WorldRenderer::WorldRenderer(const Wad& wad, const MapData& map)
   m_layerSizes.upload(std::as_bytes(std::span(sizes)));
 }
 
-void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint, const Texture& palettes,
+void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint,
+                         const Texture& palettes, int levelTime,
                          std::span<const MapSector> sectors, std::span<const MapSidedef> sidedefs) {
   if (window.width <= 0 || window.height <= 0) {
     return;
@@ -262,6 +271,17 @@ void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint, con
   m_sectorStates.upload(std::as_bytes(std::span(sectorStates)));
   m_sidedefStates.upload(std::as_bytes(std::span(sidedefStates)));
 
+  // Every layer shows itself, except animated ones, which show their group's current frame.
+  std::vector<std::uint32_t> translations(m_textures.array().layerSizes().size());
+  std::iota(translations.begin(), translations.end(), std::uint32_t{0});
+  const auto step = static_cast<std::size_t>(levelTime / ticsPerAnimationFrame);
+  for (const std::vector<std::uint32_t>& group : m_textures.animations()) {
+    for (std::size_t k = 0; k < group.size(); ++k) {
+      translations[group[k]] = group[(step + k) % group.size()];
+    }
+  }
+  m_translations.upload(std::as_bytes(std::span(translations)));
+
   glViewport(0, 0, window.width, window.height);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
@@ -273,6 +293,7 @@ void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint, con
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, sectorStatesBinding, m_sectorStates.id());
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, sidedefStatesBinding, m_sidedefStates.id());
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, layerSizesBinding, m_layerSizes.id());
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, translationsBinding, m_translations.id());
   glBindVertexArray(m_vertexArray.id());
   glDrawArrays(GL_TRIANGLES, 0, m_vertexCount);
 }

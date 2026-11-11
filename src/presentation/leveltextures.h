@@ -23,6 +23,9 @@ public:
 
   const TextureArray& array() const;
 
+  // Each animated group's layers in frame order, for groups this map uses.
+  const std::vector<std::vector<std::uint32_t>>& animations() const;
+
 private:
   struct UsedNames {
     std::vector<std::string> walls;
@@ -34,5 +37,6 @@ private:
 
   std::map<std::string, std::uint32_t, std::less<>> m_wallLayers;
   std::map<std::string, std::uint32_t, std::less<>> m_flatLayers;
+  std::vector<std::vector<std::uint32_t>> m_animations;
   TextureArray m_array;
 };

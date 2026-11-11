@@ -21,7 +21,7 @@ public:
   WorldRenderer(const Wad& wad, const MapData& map);
 
   // Not const: each call replaces the sector and sidedef state buffers' contents.
-  void draw(FramebufferSize window, const Viewpoint& viewpoint, const Texture& palettes,
+  void draw(FramebufferSize window, const Viewpoint& viewpoint, const Texture& palettes, int levelTime,
             std::span<const MapSector> sectors, std::span<const MapSidedef> sidedefs);
 
 private:
@@ -31,6 +31,7 @@ private:
   Buffer m_sectorStates;
   Buffer m_sidedefStates;
   Buffer m_layerSizes;
+  Buffer m_translations;
   VertexArray m_vertexArray;
   GLsizei m_vertexCount = 0;
 };

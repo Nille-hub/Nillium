@@ -18,7 +18,8 @@ void drawFrame(FramebufferSize window, const PatchDrawer& drawer, const Texture&
   } else if (game.automapOpen()) {
     drawMap(window, lines, palettes, game.map(), game.viewpoint());
   } else {
-    world->draw(window, game.viewpoint(), palettes, game.map().sectors, game.map().sidedefs);
+    world->draw(window, game.viewpoint(), palettes, game.levelTime(),
+                game.map().sectors, game.map().sidedefs);
   }
 
   if (menu.isOpen()) {
