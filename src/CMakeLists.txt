@@ -22,6 +22,8 @@ add_executable(
 	"assets/wad.cpp"
 	"assets/walltexture.h"
 	"assets/walltexture.cpp"
+	"game/animations.h"
+	"game/animations.cpp"
 	"game/game.h"
 	"game/game.cpp"
 	"game/mapgeometry.h"
