@@ -255,9 +255,9 @@ SidedefState sidedefState(const LevelTextures& textures, const MapSidedef& sided
 
 } // namespace
 
-WorldRenderer::WorldRenderer(const Wad& wad, const MapData& map)
+WorldRenderer::WorldRenderer(const Wad& wad, const MapData& map, std::string_view skyTexture)
     : m_program(vertexSource, fragmentSource),
-      m_textures(wad, map),
+      m_textures(wad, map, skyTexture),
       m_colormap(256, static_cast<int>(colormapRows), TextureFormat::R8, readColormap(wad).indices) {
   const std::vector<WorldVertex> vertices = buildWorldGeometry(map);
   m_vertices.upload(std::as_bytes(std::span(vertices)));

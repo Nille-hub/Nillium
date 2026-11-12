@@ -66,7 +66,8 @@ std::vector<std::vector<std::uint32_t>> animationLayers(const LayerMap& wallLaye
 
 } // namespace
 
-LevelTextures::LevelTextures(const Wad& wad, const MapData& map) : LevelTextures(wad, usedNames(map)) {}
+LevelTextures::LevelTextures(const Wad& wad, const MapData& map, std::string_view skyTexture)
+    : LevelTextures(wad, usedNames(map, skyTexture)) {}
 
 LevelTextures::LevelTextures(const Wad& wad, const UsedNames& names)
   : m_wallLayers(layerIndex(names.walls, 0)),
@@ -90,8 +91,8 @@ const std::vector<std::vector<std::uint32_t>>& LevelTextures::animations() const
   return m_animations;
 }
 
-LevelTextures::UsedNames LevelTextures::usedNames(const MapData& map) {
-  std::set<std::string> walls;
+LevelTextures::UsedNames LevelTextures::usedNames(const MapData& map, std::string_view skyTexture) {
+  std::set<std::string> walls{std::string(skyTexture)};
 
   const auto addWall = [&](const std::string& name) {
     if (name != noTexture) {

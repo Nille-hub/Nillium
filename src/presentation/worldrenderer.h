@@ -13,12 +13,13 @@
 #include <glad/glad.h>
 
 #include <span>
+#include <string_view>
 
 // Draws the level's walls, floors and ceilings in 3D. The geometry is built once from the
 // map; heights, light levels and textures are uploaded on every draw.
 class WorldRenderer {
 public:
-  WorldRenderer(const Wad& wad, const MapData& map);
+  WorldRenderer(const Wad& wad, const MapData& map, std::string_view skyTexture);
 
   // Not const: each call replaces the sector and sidedef state buffers' contents.
   void draw(FramebufferSize window, const Viewpoint& viewpoint, const Texture& palettes, int levelTime,

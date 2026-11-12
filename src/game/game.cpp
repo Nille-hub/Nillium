@@ -14,6 +14,11 @@ namespace {
 constexpr int playerOneStart = 1;
 constexpr float viewHeight = 41.0f;
 
+// Doom II Skies
+const std::string starportSky = "SKY1"; // Maps 1 - 11
+const std::string burningCitySky = "SKY2"; // Maps 12 - 20
+const std::string hellSky = "SKY3"; // Maps 21 - 30
+
 } // namespace
 
 GameMode Game::mode() const {
@@ -78,4 +83,16 @@ std::string firstMapName(GameVariant variant, int episode) {
   }
 
   return std::format("E{}M1", episode);
+}
+
+std::string skyTextureName(GameVariant variant, int episode, int map) {
+  if (variant == GameVariant::Doom) {
+    return std::format("SKY{}", episode);
+  }
+
+  if (map < 12) {
+    return starportSky;
+  }
+
+  return map < 21 ? burningCitySky : hellSky;
 }

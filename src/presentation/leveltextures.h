@@ -15,7 +15,8 @@
 // name. Wall textures and flats are separate namespaces, as in vanilla. Built once per level.
 class LevelTextures {
 public:
-  LevelTextures(const Wad& wad, const MapData& map);
+  // `skyTexture` is loaded as a wall texture in addition to the ones the map's sidedefs use.
+  LevelTextures(const Wad& wad, const MapData& map, std::string_view skyTexture);
 
   // The layer holding a wall texture or flat. Throws if the map does not use that name.
   std::uint32_t wallLayer(std::string_view name) const;
@@ -33,7 +34,7 @@ private:
   };
 
   LevelTextures(const Wad& wad, const UsedNames& names);
-  static UsedNames usedNames(const MapData& map);
+  static UsedNames usedNames(const MapData& map, std::string_view skyTexture);
 
   std::map<std::string, std::uint32_t, std::less<>> m_wallLayers;
   std::map<std::string, std::uint32_t, std::less<>> m_flatLayers;

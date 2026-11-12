@@ -54,3 +54,7 @@ private:
 
 // The first map of an episode: E<episode>M1 for Doom, MAP01 for Doom II.
 std::string firstMapName(GameVariant variant, int episode);
+
+// The sky texture a map shows: by episode in Doom (SKY1 to SKY4), by map number in Doom II
+// (MAP01-11 SKY1, MAP12-20 SKY2, later maps SKY3), as in vanilla's G_InitNew.
+std::string skyTextureName(GameVariant variant, int episode, int map);
