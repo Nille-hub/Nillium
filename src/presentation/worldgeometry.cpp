@@ -22,9 +22,11 @@ struct WallSides {
 void addWallQuad(std::vector<WorldVertex>& vertices, MapPoint a, MapPoint b, const WallSides& sides,
                  WorldPart bottom, WorldPart top) {
   const float length = std::hypot(b.x - a.x, b.y - a.y);
+  const float directionX = length > 0.0f ? (b.x - a.x) / length : 0.0f;
+  const float directionY = length > 0.0f ? (b.y - a.y) / length : 0.0f;
   const auto corner = [&](MapPoint point, float along, WorldPart part) {
-    vertices.push_back({point.x, point.y, along, length, sides.frontSector, sides.backSector, sides.frontSide,
-                        sides.backSide, sides.flags, part});
+    vertices.push_back({ point.x, point.y, along, length, directionX, directionY, sides.frontSector,
+                         sides.backSector, sides.frontSide, sides.backSide, sides.flags, part });
   };
   corner(a, 0.0f, bottom);
   corner(b, length, bottom);
@@ -70,6 +72,7 @@ std::vector<WorldVertex> buildWorldGeometry(const MapData& map) {
       const WallSides sides{frontSector, map.sidedefs[*line.back].sector, line.front, *line.back, line.flags};
       addWallQuad(worldVertexes, start, end, sides, WorldPart::LowerBottom, WorldPart::LowerTop);
       addWallQuad(worldVertexes, start, end, sides, WorldPart::UpperBottom, WorldPart::UpperTop);
+      addWallQuad(worldVertexes, start, end, sides, WorldPart::MiddleBottom, WorldPart::MiddleTop);
     }
   }
 

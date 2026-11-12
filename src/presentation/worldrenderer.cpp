@@ -26,6 +26,7 @@ layout(location = 5) in uint frontSide;
 layout(location = 6) in uint backSide;
 layout(location = 7) in uint flags;
 layout(location = 8) in uint part;
+layout(location = 9) in vec2 direction;
 
 struct Sector {
   float floorHeight;
@@ -54,6 +55,7 @@ layout(std430, binding = 2) readonly buffer LayerSizes { LayerSize layerSizes[];
 layout(std430, binding = 3) readonly buffer Translations { uint translations[]; };
 
 layout(location = 0) uniform mat4 viewProjection;
+layout(location = 1) uniform vec2 viewer;
 
 flat out uint layer;
 flat out float brightness;
@@ -68,6 +70,8 @@ const uint LowerBottom = 4u;
 const uint LowerTop = 5u;
 const uint UpperBottom = 6u;
 const uint UpperTop = 7u;
+const uint MiddleBottom = 8u;
+const uint MiddleTop = 9u;
 
 // Must match noLayer below and the flags in map.h.
 const uint noLayer = 0xFFFFFFFFu;
@@ -116,16 +120,31 @@ void main() {
       layer = currentLayer(side.lowerLayer);
       float visibleCeiling = frontVisible ? f.ceilingHeight : b.ceilingHeight;
       anchor = ((flags & lowerUnpegged) != 0u) ? visibleCeiling : top;
-    } else {
+    } else if (part == UpperBottom || part == UpperTop) {
       frontVisible = f.ceilingHeight >= b.ceilingHeight;  // seen from the higher ceiling's side
       side = sidedefs[frontVisible ? frontSide : backSide];
       bottom = min(f.ceilingHeight, b.ceilingHeight);
       top = max(f.ceilingHeight, b.ceilingHeight);
       layer = currentLayer(side.upperLayer);
       anchor = ((flags & upperUnpegged) != 0u) ? top : bottom + textureHeight(layer);
+    } else {
+      // Two-sided middle texture: seen from the side the viewer is on (Doom's front side is the
+      // right side of the line), one texture height tall, clipped to the opening.
+      vec2 lineStart = position - direction * along;
+      vec2 toViewer = viewer - lineStart;
+      frontVisible = direction.x * toViewer.y - direction.y * toViewer.x < 0.0;
+      side = sidedefs[frontVisible ? frontSide : backSide];
+      layer = currentLayer(side.middleLayer);
+      float openingBottom = max(f.floorHeight, b.floorHeight);
+      float openingTop = min(f.ceilingHeight, b.ceilingHeight);
+      anchor = ((flags & lowerUnpegged) != 0u) ? openingBottom + textureHeight(layer) : openingTop;
+      float textureTop = anchor + side.yOffset;
+      bottom = max(textureTop - textureHeight(layer), openingBottom);
+      top = max(min(textureTop, openingTop), bottom);
     }
 
-    bool isBottom = (part == WallBottom || part == LowerBottom || part == UpperBottom);
+    bool isBottom = (part == WallBottom || part == LowerBottom || part == UpperBottom ||
+                     part == MiddleBottom);
     z = isBottom ? bottom : top;
     brightness = frontVisible ? f.light : b.light;
     float u = (frontVisible ? along : lineLength - along) + side.xOffset;
@@ -239,6 +258,7 @@ WorldRenderer::WorldRenderer(const Wad& wad, const MapData& map)
   uintAttribute(6, offsetof(WorldVertex, backSide));
   uintAttribute(7, offsetof(WorldVertex, flags));
   uintAttribute(8, offsetof(WorldVertex, part));
+  floatAttribute(9, 2, offsetof(WorldVertex, directionX));
 
   // The layers never change size, so their sizes are uploaded once.
   const std::vector<LayerSize>& sizes = m_textures.array().layerSizes();
@@ -287,6 +307,7 @@ void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint,
   glDepthFunc(GL_LESS);
   const glm::mat4 matrix = viewProjection(viewpoint, window);
   glProgramUniformMatrix4fv(m_program.id(), 0, 1, GL_FALSE, glm::value_ptr(matrix));
+  glProgramUniform2f(m_program.id(), 1, viewpoint.x, viewpoint.y);
   glUseProgram(m_program.id());
   glBindTextureUnit(textureArrayUnit, m_textures.array().id());
   glBindTextureUnit(paletteUnit, palettes.id());
