@@ -6,8 +6,9 @@
 #include <span>
 
 enum class TextureFormat {
-  Rg8,
-  Rgb8,
+  R8,    // one byte per texel, e.g. colormap rows of palette indices
+  Rg8,   // palette index and opaque flag
+  Rgb8,  // colours, e.g. the palettes
 };
 
 class Texture {
