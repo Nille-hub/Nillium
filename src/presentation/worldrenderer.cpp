@@ -1,10 +1,12 @@
 #include "presentation/worldrenderer.h"
+#include "assets/colormap.h"
 #include "presentation/camera.h"
 #include "presentation/worldgeometry.h"
 #include "game/animations.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
@@ -55,11 +57,14 @@ layout(std430, binding = 2) readonly buffer LayerSizes { LayerSize layerSizes[];
 layout(std430, binding = 3) readonly buffer Translations { uint translations[]; };
 
 layout(location = 0) uniform mat4 viewProjection;
-layout(location = 1) uniform vec2 viewer;
+layout(location = 1) uniform vec2 viewer;         // the viewpoint's map position
+layout(location = 2) uniform vec2 viewDirection;  // unit vector the viewpoint looks along
 
 flat out uint layer;
-flat out float brightness;
+flat out int lightStep;  // 0 (dark) to 15 (bright), as vanilla's lightnum
+flat out int isWall;     // walls and flats use different distance tables
 out vec2 texel;
+out float depth;         // distance along the view direction, which vanilla's lighting uses
 
 // Must match WorldPart in worldgeometry.h.
 const uint FrontFloor = 0u;
@@ -96,7 +101,8 @@ void main() {
     // Flats lie on vanilla's fixed 64-unit world grid; texture rows run southward.
     z = (part == FrontFloor) ? f.floorHeight : f.ceilingHeight;
     layer = currentLayer((part == FrontFloor) ? f.floorLayer : f.ceilingLayer);
-    brightness = f.light;
+    lightStep = int(f.light) >> 4;
+    isWall = 0;
     texel = vec2(position.x, -position.y);
   } else {
     bool frontVisible;
@@ -146,12 +152,16 @@ void main() {
     bool isBottom = (part == WallBottom || part == LowerBottom || part == UpperBottom ||
                      part == MiddleBottom);
     z = isBottom ? bottom : top;
-    brightness = frontVisible ? f.light : b.light;
+    // Vanilla's fake contrast: east-west walls one step darker, north-south walls one brighter.
+    int contrast = (direction.y == 0.0) ? -1 : ((direction.x == 0.0) ? 1 : 0);
+    lightStep = clamp((int(frontVisible ? f.light : b.light) >> 4) + contrast, 0, 15);
+    isWall = 1;
     float u = (frontVisible ? along : lineLength - along) + side.xOffset;
     float v = anchor - z + side.yOffset;
     texel = vec2(u, v);
   }
 
+  depth = dot(position - viewer, viewDirection);
   gl_Position = viewProjection * vec4(position, z, 1.0);
 }
 )glsl";
@@ -160,8 +170,10 @@ constexpr std::string_view fragmentSource = R"glsl(
 #version 460 core
 
 flat in uint layer;
-flat in float brightness;
+flat in int lightStep;
+flat in int isWall;
 in vec2 texel;
+in float depth;
 out vec4 color;
 
 struct LayerSize {
@@ -173,6 +185,21 @@ layout(std430, binding = 2) readonly buffer LayerSizes { LayerSize layerSizes[];
 
 layout(binding = 0) uniform sampler2DArray textures;
 layout(binding = 1) uniform sampler2D palettes;
+layout(binding = 2) uniform sampler2D colormap;
+
+// Vanilla's light tables (r_main.c): a row starting at startmap, brightened up close.
+int colormapRow() {
+  int startmap = (15 - lightStep) * 4;
+  float d = max(depth, 1.0);
+  int brighten;
+  if (isWall != 0) {
+    brighten = min(int(2560.0 / d), 47) / 2;  // scalelight: scale index 2560 / depth, at most 47
+  } else {
+    int j = min(int(d / 16.0), 127);          // zlight: depth in steps of 16, at most 127
+    brighten = (160 / (j + 1)) / 2;
+  }
+  return clamp(startmap - brighten, 0, 31);
+}
 
 void main() {
   if (layer == 0xFFFFFFFFu) {
@@ -185,7 +212,8 @@ void main() {
     discard;
   }
   int index = int(indexOpaque.r * 255.0 + 0.5);
-  color = vec4(texelFetch(palettes, ivec2(index, 0), 0).rgb * brightness, 1.0);
+  int lit = int(texelFetch(colormap, ivec2(index, colormapRow()), 0).r * 255.0 + 0.5);
+  color = vec4(texelFetch(palettes, ivec2(lit, 0), 0).rgb, 1.0);
 }
 )glsl";
 
@@ -212,8 +240,8 @@ constexpr GLuint layerSizesBinding = 2;
 constexpr GLuint translationsBinding = 3;
 constexpr GLuint textureArrayUnit = 0;
 constexpr GLuint paletteUnit = 1;
+constexpr GLuint colormapUnit = 2;
 constexpr std::uint32_t noLayer = 0xFFFFFFFF;
-constexpr float maxLight = 255.0f;
 
 std::uint32_t wallLayerOrNone(const LevelTextures& textures, const std::string& name) {
   return name != noTexture ? textures.wallLayer(name) : noLayer;
@@ -228,7 +256,9 @@ SidedefState sidedefState(const LevelTextures& textures, const MapSidedef& sided
 } // namespace
 
 WorldRenderer::WorldRenderer(const Wad& wad, const MapData& map)
-    : m_program(vertexSource, fragmentSource), m_textures(wad, map) {
+    : m_program(vertexSource, fragmentSource),
+      m_textures(wad, map),
+      m_colormap(256, static_cast<int>(colormapRows), TextureFormat::R8, readColormap(wad).indices) {
   const std::vector<WorldVertex> vertices = buildWorldGeometry(map);
   m_vertices.upload(std::as_bytes(std::span(vertices)));
   m_vertexCount = static_cast<GLsizei>(vertices.size());
@@ -277,7 +307,7 @@ void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint,
   for (const MapSector& sector : sectors) {
     sectorStates.push_back({static_cast<float>(sector.floorHeight),
                             static_cast<float>(sector.ceilingHeight),
-                            static_cast<float>(sector.light) / maxLight,
+                            static_cast<float>(sector.light),
                             m_textures.flatLayer(sector.floorFlat),
                             m_textures.flatLayer(sector.ceilingFlat)});
   }
@@ -308,9 +338,11 @@ void WorldRenderer::draw(FramebufferSize window, const Viewpoint& viewpoint,
   const glm::mat4 matrix = viewProjection(viewpoint, window);
   glProgramUniformMatrix4fv(m_program.id(), 0, 1, GL_FALSE, glm::value_ptr(matrix));
   glProgramUniform2f(m_program.id(), 1, viewpoint.x, viewpoint.y);
+  glProgramUniform2f(m_program.id(), 2, std::cos(viewpoint.angle), std::sin(viewpoint.angle));
   glUseProgram(m_program.id());
   glBindTextureUnit(textureArrayUnit, m_textures.array().id());
   glBindTextureUnit(paletteUnit, palettes.id());
+  glBindTextureUnit(colormapUnit, m_colormap.id());
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, sectorStatesBinding, m_sectorStates.id());
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, sidedefStatesBinding, m_sidedefStates.id());
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, layerSizesBinding, m_layerSizes.id());

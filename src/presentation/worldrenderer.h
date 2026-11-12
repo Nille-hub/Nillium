@@ -27,6 +27,7 @@ public:
 private:
   ShaderProgram m_program;
   LevelTextures m_textures;
+  Texture m_colormap;
   Buffer m_vertices;
   Buffer m_sectorStates;
   Buffer m_sidedefStates;
